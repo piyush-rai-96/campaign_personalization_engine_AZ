@@ -11,8 +11,8 @@ import { cn } from '@/lib/utils'
 
 // Brand Guidelines Data (mutable for demo)
 const initialBrandGuidelines = {
-  lastUpdatedBy: 'Sarah Chen',
-  lastUpdatedAt: 'Dec 15, 2024',
+  lastUpdatedBy: 'Maria Lopez',
+  lastUpdatedAt: 'Mar 10, 2026',
   logo: {
     rules: [
       'Full color logo on white/light backgrounds',
@@ -47,102 +47,166 @@ const initialBrandGuidelines = {
   ]
 }
 
-// Creative Campaigns Data - Linked to Sally Beauty campaigns
+// Creative Campaigns Data - Linked to AutoZone Auto Parts campaigns
 const creativeCampaigns = [
   { 
     id: 'CC-001', 
-    name: 'Hair Color Holiday Refresh',
-    linkedCampaigns: ['Hair Color Holiday Refresh'],
-    linkedPromotions: ['25% Off Wella Color'],
-    category: 'Hair Color',
+    name: 'Purple Power Cleaner/Degreaser',
+    linkedCampaigns: ['Purple Power Cleaner/Degreaser'],
+    linkedPromotions: ['$4.99 + 300 Bonus Points'],
+    category: 'Fluids and Chemicals',
     assetTypes: ['Banner', 'Email'],
     status: 'Draft',
-    lastUpdated: 'Dec 17, 2024',
+    lastUpdated: 'Mar 17, 2026',
     assetCount: 4,
-    thumbnail: '/images/hair_color/WELLA17.jpg',
+    thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_1.webp',
     products: [
-      { name: 'Wella Color Charm Toner', image: '/images/hair_color/WELLA17.jpg' },
-      { name: 'Ion Permanent Crème', image: '/images/hair_color/ION87.jpg' }
+      { name: 'Purple Power Cleaner 40 oz.' },
+      { name: 'Purple Power Degreaser Gallon' }
     ]
   },
   { 
     id: 'CC-002', 
-    name: 'Olaplex Bond Repair Launch',
-    linkedCampaigns: ['Olaplex Bond Repair Launch'],
-    linkedPromotions: ['20% Off Olaplex'],
-    category: 'Hair Care',
+    name: 'Armor All Products',
+    linkedCampaigns: ['Armor All Products'],
+    linkedPromotions: ['$5 Gift Card + 200 Bonus Points'],
+    category: 'Appearance and Paint',
     assetTypes: ['Banner', 'Email', 'Push'],
     status: 'Approved',
-    lastUpdated: 'Dec 15, 2024',
+    lastUpdated: 'Mar 15, 2026',
     assetCount: 6,
-    thumbnail: '/images/hair_care/SBS-009616.jpg',
+    thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_2.webp',
     products: [
-      { name: 'Olaplex No. 4 Shampoo', image: '/images/hair_care/SBS-009616.jpg' },
-      { name: 'Mielle Rosemary Mint', image: '/images/hair_care/SBS-762003.jpg' }
+      { name: 'Armor All Protectant Spray' },
+      { name: 'Armor All Cleaning Wipes' }
     ]
   },
   { 
     id: 'CC-003', 
-    name: 'Styling Tools VIP Loyalty',
-    linkedCampaigns: ['Styling Tools VIP Loyalty'],
-    linkedPromotions: ['$30 Off BaBylissPRO'],
-    category: 'Styling Tools',
+    name: 'Innova Wireless Code Scanner',
+    linkedCampaigns: ['Innova Wireless Code Scanner'],
+    linkedPromotions: ['Save $10 + 200 Bonus Points'],
+    category: 'Tools',
     assetTypes: ['Banner', 'Social'],
     status: 'In Progress',
-    lastUpdated: 'Dec 16, 2024',
+    lastUpdated: 'Mar 16, 2026',
     assetCount: 3,
-    thumbnail: '/images/styling_tools/SBS-021477.jpg',
+    thumbnail: '/images/banner_assets/Adv-Rewards-Page_Adv-Rewards-Week_April-2026_innova_3.webp',
     products: [
-      { name: 'BaBylissPRO Nano Titanium', image: '/images/styling_tools/SBS-021477.jpg' },
-      { name: 'Hot Tools 24K Gold', image: '/images/styling_tools/SBS-345825.jpg' }
+      { name: 'Innova 5610 Wireless Scanner' },
+      { name: 'Innova 5210 Code Reader' }
     ]
   },
   { 
     id: 'CC-004', 
-    name: 'Nails & Lashes Bundle',
-    linkedCampaigns: ['Nails & Lashes Bundle Promo'],
-    linkedPromotions: ['Buy 2 Get 1 Free'],
-    category: 'Nails',
+    name: 'Chevron Techron Fuel System Cleaner',
+    linkedCampaigns: ['Chevron Techron Fuel System Cleaner'],
+    linkedPromotions: ['$8.99 + 2X Bonus Points'],
+    category: 'Fuel and Emissions System',
     assetTypes: ['Banner', 'Email'],
     status: 'Approved',
-    lastUpdated: 'Dec 12, 2024',
+    lastUpdated: 'Mar 12, 2026',
     assetCount: 5,
-    thumbnail: '/images/nails/SBS-011313.jpg',
+    thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_4.webp',
     products: [
-      { name: 'OPI Nail Lacquer', image: '/images/nails/SBS-011313.jpg' },
-      { name: 'Gelish Soak-Off Gel', image: '/images/nails/SBS-004882.jpg' }
+      { name: 'Techron Fuel System Cleaner 12 oz.' },
+      { name: 'Techron High Mileage 12 oz.' }
     ]
   },
   { 
     id: 'CC-005', 
-    name: "Men's Grooming Barber Pro",
-    linkedCampaigns: ["Men's Grooming Barber Pro"],
-    linkedPromotions: ['15% Off Andis Clippers'],
-    category: "Men's Grooming",
+    name: 'WD-40 Smart Straw, 12 Oz.',
+    linkedCampaigns: ['WD-40 Smart Straw, 12 Oz.'],
+    linkedPromotions: ['$8.99 + 2X Bonus Points'],
+    category: 'Fluids and Chemicals',
     assetTypes: ['Banner', 'Push'],
     status: 'Approved',
-    lastUpdated: 'Dec 11, 2024',
+    lastUpdated: 'Mar 11, 2026',
     assetCount: 4,
-    thumbnail: '/images/mens_grooming/SBS-395010.jpg',
+    thumbnail: '/images/banner_assets/AdvanceRewards_460x260_5.webp',
     products: [
-      { name: 'Andis T-Outliner', image: '/images/mens_grooming/SBS-395010.jpg' },
-      { name: 'Wahl Clipper', image: '/images/mens_grooming/SBS-625016.jpg' }
+      { name: 'WD-40 Smart Straw 12 oz.' },
+      { name: 'WD-40 Specialist Penetrant' }
     ]
   },
   { 
     id: 'CC-006', 
-    name: 'Textured Hair Curl Love',
-    linkedCampaigns: ['Textured Hair Care Curl Love'],
-    linkedPromotions: ['Buy 3 Save 25%'],
-    category: 'Textured Hair Care',
+    name: 'Valvoline Motorcycle Oil Quarts',
+    linkedCampaigns: ['Valvoline Motorcycle Oil Quarts'],
+    linkedPromotions: ['50 Bonus Points'],
+    category: 'Oil and Lubricants',
     assetTypes: ['Banner', 'Email', 'Social'],
     status: 'Needs Update',
-    lastUpdated: 'Dec 10, 2024',
+    lastUpdated: 'Mar 10, 2026',
     assetCount: 5,
-    thumbnail: '/images/textured_hair_care/SBS-459068.jpg',
+    thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6.webp',
     products: [
-      { name: 'Cantu Shea Butter', image: '/images/textured_hair_care/SBS-459068.jpg' },
-      { name: 'The Doux Mousse', image: '/images/textured_hair_care/SBS-801153.jpg' }
+      { name: 'Valvoline 4-Stroke Motorcycle Oil' },
+      { name: 'Valvoline 2-Stroke Motorcycle Oil' }
+    ]
+  },
+  { 
+    id: 'CC-007', 
+    name: 'STP Octane Booster',
+    linkedCampaigns: ['STP Octane Booster'],
+    linkedPromotions: ['Buy One, Get One FREE + 2X Bonus Points'],
+    category: 'Fuel and Emissions System',
+    assetTypes: ['Banner', 'Social'],
+    status: 'Approved',
+    lastUpdated: 'Mar 20, 2026',
+    assetCount: 3,
+    thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_7.webp',
+    products: [
+      { name: 'STP Octane Booster 5.25 oz.' },
+      { name: 'STP Super Concentrated Fuel Injector' }
+    ]
+  },
+  { 
+    id: 'CC-008', 
+    name: 'TruFuel Premixed Small Engine Fuel',
+    linkedCampaigns: ['TruFuel Premixed Small Engine Fuel'],
+    linkedPromotions: ['$7.99 + 2X Bonus Points'],
+    category: 'Lawn and Garden',
+    assetTypes: ['Banner', 'Email'],
+    status: 'In Progress',
+    lastUpdated: 'Mar 19, 2026',
+    assetCount: 3,
+    thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_8.webp',
+    products: [
+      { name: 'TruFuel 50:1 Pre-Mixed Fuel' },
+      { name: 'TruFuel 40:1 Pre-Mixed Fuel' }
+    ]
+  },
+  { 
+    id: 'CC-009', 
+    name: 'Lucas Chain Lube Aerosol',
+    linkedCampaigns: ['Lucas Chain Lube Aerosol'],
+    linkedPromotions: ['Save $2 + 2X Bonus Points'],
+    category: 'Oil and Lubricants',
+    assetTypes: ['Banner', 'Push', 'Email'],
+    status: 'Draft',
+    lastUpdated: 'Mar 18, 2026',
+    assetCount: 4,
+    thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_9.webp',
+    products: [
+      { name: 'Lucas Chain Lube 11 oz. Aerosol' },
+      { name: 'Lucas Red "N" Tacky Grease' }
+    ]
+  },
+  { 
+    id: 'CC-010', 
+    name: 'Garage of Legends Sweepstakes',
+    linkedCampaigns: ['Win a $25,000 Legendary Garage Makeover'],
+    linkedPromotions: ['Curated by Gears & Gasoline — Ends May 31, 2026'],
+    category: 'Accessories',
+    assetTypes: ['Banner', 'Social', 'Email'],
+    status: 'Approved',
+    lastUpdated: 'Mar 21, 2026',
+    assetCount: 3,
+    thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6_alt.webp',
+    products: [
+      { name: 'Garage of Legends Decal Kit' },
+      { name: 'Gears & Gasoline Merch Pack' }
     ]
   },
 ]
@@ -170,36 +234,57 @@ type CreativeAsset = {
 
 // Creative Assets for campaigns - mapped by campaign ID
 const campaignAssetsMap: Record<string, CreativeAsset[]> = {
-  'CC-001': [ // Hair Color Holiday Refresh
-    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage hero for hair color promotion', thumbnail: '/images/hair_color/WELLA17.jpg', headline: '25% OFF Wella Color!', subcopy: 'Professional color results at home' },
-    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Square format for Instagram feed', thumbnail: '/images/hair_color/ION87.jpg', headline: 'Transform Your Look', subcopy: 'Ion Permanent Crème - vibrant color' },
-    { id: 'asset-3', type: 'Banner', format: '4:5', channel: 'Social', status: 'Needs Update', agentNote: 'Stories format, needs CTA adjustment', thumbnail: '/images/hair_color/MANIC2.jpg', headline: 'Go Bold This Holiday', subcopy: 'Manic Panic vivid colors' },
-    { id: 'asset-4', type: 'Email', format: '600px', channel: 'Email', status: 'Draft', agentNote: 'Email header banner', thumbnail: '/images/hair_color/ARTFOX2.jpg', headline: 'Holiday Color Sale', subcopy: 'Arctic Fox semi-permanent shades' },
+  'CC-001': [ // Purple Power Cleaner/Degreaser
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage hero for Purple Power promo', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_1.webp', headline: '$4.99 + 300 Bonus Points', subcopy: 'Purple Power Cleaner/Degreaser — ultimate cleaning power' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Square format for social feed', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_1.webp', headline: 'Purple Power Deal', subcopy: 'Get 300 Bonus Points with purchase' },
+    { id: 'asset-3', type: 'Banner', format: '4:5', channel: 'Social', status: 'Needs Update', agentNote: 'Stories format, needs CTA adjustment', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_1.webp', headline: 'Clean & Save', subcopy: 'Purple Power Degreaser — just $4.99' },
+    { id: 'asset-4', type: 'Email', format: '600px', channel: 'Email', status: 'Draft', agentNote: 'Email header banner for rewards members', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_1.webp', headline: 'Rewards Week: Purple Power', subcopy: '300 Bonus Points on Purple Power Cleaner' },
   ],
-  'CC-002': [ // Olaplex Bond Repair Launch
-    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage hero for Olaplex launch', thumbnail: '/images/hair_care/SBS-009616.jpg', headline: 'Repair & Restore', subcopy: 'Olaplex No. 4 Bond Maintenance' },
-    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Square format for Instagram', thumbnail: '/images/hair_care/SBS-762003.jpg', headline: 'Healthy Hair Starts Here', subcopy: 'Professional bond repair technology' },
-    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Approved', agentNote: 'Email campaign header', thumbnail: '/images/hair_care/SBS-009285.jpg', headline: '20% OFF Olaplex', subcopy: 'Limited time offer on all Olaplex' },
+  'CC-002': [ // Armor All Products
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage hero for Armor All promo', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_2.webp', headline: '$5 Gift Card + 200 Bonus Points', subcopy: 'Spend $15 on Armor All Products — gift card by mail' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Square format for social', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_2.webp', headline: 'Armor All Rewards', subcopy: 'Get a $5 gift card when you spend $15' },
+    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Approved', agentNote: 'Email campaign for Armor All rebate', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_2.webp', headline: 'Armor All Gift Card Offer', subcopy: '200 Bonus Points + $5 gift card by mail' },
   ],
-  'CC-003': [ // Styling Tools VIP Loyalty
-    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'VIP exclusive styling tools banner', thumbnail: '/images/styling_tools/SBS-021477.jpg', headline: 'Pro Tools, Pro Results', subcopy: 'BaBylissPRO Nano Titanium' },
-    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'In Progress', agentNote: 'Social media square format', thumbnail: '/images/styling_tools/SBS-345825.jpg', headline: '$30 OFF Hot Tools', subcopy: '24K Gold Curling Iron' },
-    { id: 'asset-3', type: 'Banner', format: '4:5', channel: 'Social', status: 'Draft', agentNote: 'Stories format for VIP promo', thumbnail: '/images/styling_tools/ION105.jpg', headline: 'VIP Exclusive', subcopy: 'Ion Magnesium Flat Iron' },
+  'CC-003': [ // Innova Wireless Code Scanner
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage hero for Innova scanner promo', thumbnail: '/images/banner_assets/Adv-Rewards-Page_Adv-Rewards-Week_April-2026_innova_3.webp', headline: 'Save $10 + 200 Bonus Points', subcopy: 'Innova Wireless Code Scanner — diagnose like a pro' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'In Progress', agentNote: 'Social media square format', thumbnail: '/images/banner_assets/Adv-Rewards-Page_Adv-Rewards-Week_April-2026_innova_3.webp', headline: 'Scan Smarter', subcopy: 'Innova Wireless Scanner — $10 off + bonus points' },
+    { id: 'asset-3', type: 'Banner', format: '4:5', channel: 'Social', status: 'Draft', agentNote: 'Stories format for scanner promo', thumbnail: '/images/banner_assets/Adv-Rewards-Page_Adv-Rewards-Week_April-2026_innova_3.webp', headline: 'DIY Diagnostics', subcopy: 'Bluetooth OBD2 scanner — read & clear codes instantly' },
   ],
-  'CC-004': [ // Nails & Lashes Bundle
-    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Bundle promo homepage banner', thumbnail: '/images/nails/SBS-011313.jpg', headline: 'Holiday Glam Bundle', subcopy: 'OPI + Ardell Lashes' },
-    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Instagram feed format', thumbnail: '/images/nails/SBS-004882.jpg', headline: 'Buy 2 Get 1 Free', subcopy: 'Gelish Soak-Off Gel Polish' },
-    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Approved', agentNote: 'Email promotion header', thumbnail: '/images/cosmetics_lashes/SBS-001686.jpg', headline: 'Complete Your Look', subcopy: 'Nails + Lashes bundle deal' },
+  'CC-004': [ // Chevron Techron Fuel System Cleaner
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage hero for Techron promo', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_4.webp', headline: '$8.99 + 2X Bonus Points', subcopy: 'Chevron Techron Fuel System Cleaner — Regular or High Mileage' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Square format for social', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_4.webp', headline: 'Techron Fuel Cleaner', subcopy: 'Double points on every bottle — $8.99' },
+    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Approved', agentNote: 'Email promo for Techron', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_4.webp', headline: 'Clean Your Engine', subcopy: 'Techron 12 oz. — 2X Bonus Points this week' },
   ],
-  'CC-005': [ // Men's Grooming Barber Pro
-    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Barber professional tools banner', thumbnail: '/images/mens_grooming/SBS-395010.jpg', headline: 'Barber Pro Tools', subcopy: 'Andis T-Outliner Trimmer' },
-    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Social media promotion', thumbnail: '/images/mens_grooming/SBS-625016.jpg', headline: '15% OFF Clippers', subcopy: 'Wahl Professional Series' },
-    { id: 'asset-3', type: 'Push', format: 'Push', channel: 'Push', status: 'Approved', agentNote: 'Push notification for barbers', thumbnail: '/images/mens_grooming/SBS-785007.jpg', headline: 'Pro Grooming Sale', subcopy: 'Shop barber essentials' },
+  'CC-005': [ // WD-40 Smart Straw
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage hero for WD-40 promo', thumbnail: '/images/banner_assets/AdvanceRewards_460x260_5.webp', headline: '$8.99 + 2X Bonus Points', subcopy: 'WD-40 Smart Straw, 12 Oz. — precision spray' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Social square for WD-40', thumbnail: '/images/banner_assets/AdvanceRewards_460x260_5.webp', headline: 'WD-40 Smart Straw', subcopy: 'Double points — the can that does it all' },
+    { id: 'asset-3', type: 'Push', format: 'Push', channel: 'Push', status: 'Approved', agentNote: 'Push notification for WD-40 deal', thumbnail: '/images/banner_assets/AdvanceRewards_460x260_5.webp', headline: 'WD-40 Deal Alert', subcopy: '$8.99 + earn 2X Bonus Points today' },
   ],
-  'CC-006': [ // Textured Hair Curl Love
-    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Curl care homepage banner', thumbnail: '/images/textured_hair_care/SBS-459068.jpg', headline: 'Love Your Curls', subcopy: 'Cantu Shea Butter Collection' },
-    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Needs Update', agentNote: 'Instagram format needs refresh', thumbnail: '/images/textured_hair_care/SBS-801153.jpg', headline: 'Define & Shine', subcopy: 'The Doux Mousse Def' },
-    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Approved', agentNote: 'Email campaign for curly hair', thumbnail: '/images/textured_hair_care/SBS-310320.jpg', headline: 'Buy 3 Save 25%', subcopy: 'Textured hair essentials' },
+  'CC-006': [ // Valvoline Motorcycle Oil Quarts
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage banner for Valvoline motorcycle oil', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6.webp', headline: '50 Bonus Points', subcopy: 'Valvoline Motorcycle Oil Quarts — ride ready' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Needs Update', agentNote: 'Social format for motorcycle oil', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6.webp', headline: 'Ride Season Rewards', subcopy: '50 Bonus Points on Valvoline Motorcycle Oil' },
+    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Approved', agentNote: 'Email for motorcycle riders', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6.webp', headline: 'Valvoline Motorcycle Oil', subcopy: 'Earn 50 Bonus Points per quart purchased' },
+  ],
+  'CC-007': [ // STP Octane Booster
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Homepage hero for STP Octane Booster BOGO', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_7.webp', headline: 'Buy One, Get One FREE', subcopy: 'STP Octane Booster + 2X Bonus Points' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Social square for STP BOGO', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_7.webp', headline: 'STP BOGO Deal', subcopy: 'Octane Booster — buy one, get one free' },
+    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Draft', agentNote: 'Email blast for STP promo', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_7.webp', headline: 'Double Up on STP', subcopy: 'BOGO + 2X Bonus Points — limited time' },
+  ],
+  'CC-008': [ // TruFuel Premixed Small Engine Fuel
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'In Progress', agentNote: 'Homepage banner for TruFuel promo', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_8.webp', headline: '$7.99 + 2X Bonus Points', subcopy: 'TruFuel Premixed Small Engine Fuel — ethanol-free' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Social format for TruFuel', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_8.webp', headline: 'TruFuel Ready-Mix', subcopy: 'Pre-mixed fuel for mowers & trimmers — $7.99' },
+    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Approved', agentNote: 'Email for lawn & garden segment', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_8.webp', headline: 'Lawn Season Fuel Up', subcopy: 'TruFuel + 2X Bonus Points — protect your engine' },
+  ],
+  'CC-009': [ // Lucas Chain Lube Aerosol
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Draft', agentNote: 'Homepage hero for Lucas Chain Lube', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_9.webp', headline: 'Save $2 + 2X Bonus Points', subcopy: 'Lucas Chain Lube Aerosol — long-lasting protection' },
+    { id: 'asset-2', type: 'Push', format: 'Push', channel: 'Push', status: 'Approved', agentNote: 'Push notification for Lucas deal', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_9.webp', headline: 'Lucas Lube Deal', subcopy: 'Save $2 on Chain Lube + earn double points' },
+    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Draft', agentNote: 'Email for motorcycle/ATV riders', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_9.webp', headline: 'Chain Maintenance Sale', subcopy: 'Lucas Aerosol — $2 off + 2X Bonus Points' },
+    { id: 'asset-4', type: 'Banner', format: '4:5', channel: 'Social', status: 'Draft', agentNote: 'Stories format for chain lube', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_9.webp', headline: 'Protect Your Chain', subcopy: 'Lucas Chain Lube — save $2 this week' },
+  ],
+  'CC-010': [ // Garage of Legends Sweepstakes
+    { id: 'asset-1', type: 'Banner', format: '16:9', channel: 'Web', status: 'Approved', agentNote: 'Hero banner for Garage of Legends sweepstakes', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6_alt.webp', headline: 'Win a $25,000 Garage Makeover', subcopy: 'Garage of Legends Sweepstakes — curated by Gears & Gasoline' },
+    { id: 'asset-2', type: 'Banner', format: '1:1', channel: 'Social', status: 'Approved', agentNote: 'Social square for sweepstakes', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6_alt.webp', headline: 'Garage of Legends', subcopy: 'Enter to win a legendary $25K garage makeover' },
+    { id: 'asset-3', type: 'Email', format: '600px', channel: 'Email', status: 'Approved', agentNote: 'Email for sweepstakes announcement', thumbnail: '/images/banner_assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6_alt.webp', headline: 'Enter the Sweepstakes', subcopy: 'Ends May 31, 2026 — Gears & Gasoline garage makeover' },
   ],
 }
 
@@ -218,36 +303,36 @@ type ViewMode = 'library' | 'review' | 'compare' | 'create'
 type GuidelinesMode = 'view' | 'agent-update' | 'upload-json' | 'review-changes'
 type CreateStep = 'details' | 'products' | 'brief' | 'generate' | 'preview'
 
-// Sally Beauty products for selection
+// AutoZone Auto Parts products for selection
 const availableProducts = [
-  { id: 'prod-1', name: 'Wella Color Charm Toner', category: 'Hair Color', price: 8.99, image: '/images/hair_color/WELLA17.jpg' },
-  { id: 'prod-2', name: 'Ion Permanent Crème', category: 'Hair Color', price: 7.49, image: '/images/hair_color/ION87.jpg' },
-  { id: 'prod-3', name: 'Olaplex No. 4 Shampoo', category: 'Hair Care', price: 30.00, image: '/images/hair_care/SBS-009616.jpg' },
-  { id: 'prod-4', name: 'BaBylissPRO Nano Titanium', category: 'Styling Tools', price: 149.99, image: '/images/styling_tools/SBS-021477.jpg' },
-  { id: 'prod-5', name: 'OPI Nail Lacquer', category: 'Nails', price: 11.99, image: '/images/nails/SBS-011313.jpg' },
-  { id: 'prod-6', name: 'Andis T-Outliner', category: "Men's Grooming", price: 89.99, image: '/images/mens_grooming/SBS-395010.jpg' },
-  { id: 'prod-7', name: 'Cantu Shea Butter', category: 'Textured Hair Care', price: 6.99, image: '/images/textured_hair_care/SBS-459068.jpg' },
-  { id: 'prod-8', name: 'Manic Panic Vampire Red', category: 'Hair Color', price: 13.99, image: '/images/hair_color/MANIC2.jpg' },
+  { id: 'prod-1', name: 'Mobil 1 Full Synthetic 5W-30', category: 'Oil and Lubricants', price: 29.99, image: '/images/oil_change_filter_kits/SKU 10558155.webp' },
+  { id: 'prod-2', name: 'Castrol EDGE 5W-30', category: 'Oil and Lubricants', price: 27.99, image: '/images/oil_change_filter_kits/SKU 10693169.webp' },
+  { id: 'prod-3', name: 'Duralast Gold Ceramic Brake Pads', category: 'Braking', price: 44.99, image: '/images/brake_battery_essentials/SKU 2-12257635.webp' },
+  { id: 'prod-4', name: 'DieHard Gold Battery Group 65', category: 'Battery and Electrical', price: 189.99, image: '/images/fleet_emergency_parts/SKU 4-11089445.webp' },
+  { id: 'prod-5', name: 'STP Extended Life Oil Filter', category: 'Filters and PCV', price: 8.99, image: '/images/air_filter_pcv_components/SKU 5-11592885.webp' },
+  { id: 'prod-6', name: 'Bosch Icon Beam Wiper Blade 22"', category: 'Wipers and Related', price: 24.99, image: '/images/wiper_visibility_products/SKU 6-11386730.webp' },
+  { id: 'prod-7', name: 'Fram Extra Guard Oil Filter', category: 'Filters and PCV', price: 6.99, image: '/images/air_filter_pcv_components/SKU 5-22141637.webp' },
+  { id: 'prod-8', name: 'Rain-X Latitude Wiper Blade 18"', category: 'Wipers and Related', price: 19.99, image: '/images/wiper_visibility_products/SKU 6-11688408.webp' },
 ]
 
-// Available segments for selection - Sally Beauty specific
+// Available segments for selection - AutoZone Auto Parts specific
 const availableSegments = [
-  { id: 'seg-1', name: 'Color Enthusiasts', customers: 85000, description: 'Frequent color changers' },
-  { id: 'seg-2', name: 'Professional Stylists', customers: 140000, description: 'Licensed pros buying for clients' },
-  { id: 'seg-3', name: 'First-Time Colorists', customers: 95000, description: 'New to at-home color' },
-  { id: 'seg-4', name: 'Curl Care Devotees', customers: 72000, description: 'Textured hair enthusiasts' },
-  { id: 'seg-5', name: 'Tool Upgraders', customers: 45000, description: 'Seeking premium styling tools' },
-  { id: 'seg-6', name: 'Nail Art Lovers', customers: 38000, description: 'DIY nail enthusiasts' },
+  { id: 'seg-1', name: 'DIY Routine Maintenance Buyers', customers: 145000, description: 'Regular oil change & filter buyers' },
+  { id: 'seg-2', name: 'DIY Price-Sensitive Promo Buyers', customers: 82000, description: 'Buy when discounted or bundled' },
+  { id: 'seg-3', name: 'DIY Urgent Repair Buyers', customers: 105000, description: 'Failure-triggered immediate purchases' },
+  { id: 'seg-4', name: 'PRO High-Value Shops', customers: 68000, description: 'Independent repair shops with bulk orders' },
+  { id: 'seg-5', name: 'PRO Fleet Operators', customers: 42000, description: 'Fleet maintenance with scheduled deliveries' },
+  { id: 'seg-6', name: 'PRO Emergency Restock Buyers', customers: 38000, description: 'Same-day emergency parts restock' },
 ]
 
-// Available promotions for selection - Sally Beauty specific
+// Available promotions for selection - AutoZone Auto Parts specific
 const availablePromos = [
-  { id: 'promo-1', name: '25% Off Wella Color', type: 'Percentage', value: '25% OFF' },
-  { id: 'promo-2', name: 'Buy 2 Get 1 Free Nails', type: 'BOGO', value: 'B2G1' },
-  { id: 'promo-3', name: '$30 Off BaBylissPRO', type: 'Fixed', value: '$30 OFF' },
-  { id: 'promo-4', name: '20% Off Olaplex', type: 'Percentage', value: '20% OFF' },
-  { id: 'promo-5', name: 'Free Gift with $50+', type: 'GWP', value: 'Free Gift' },
-  { id: 'promo-6', name: 'Bundle & Save 25%', type: 'Bundle', value: '25% OFF' },
+  { id: 'promo-1', name: '15% Off Oil Change Kit', type: 'Percentage', value: '15% OFF' },
+  { id: 'promo-2', name: '20% Off Brake Kit', type: 'Percentage', value: '20% OFF' },
+  { id: 'promo-3', name: '15% Off + Free Battery Test', type: 'Bundle', value: '15% OFF + Free Test' },
+  { id: 'promo-4', name: '15% Off Filter Kit', type: 'Percentage', value: '15% OFF' },
+  { id: 'promo-5', name: '25% Off PRO Contract', type: 'Contract', value: '25% OFF' },
+  { id: 'promo-6', name: 'Buy 2 Wipers Get Fluid Free', type: 'BOGO', value: 'B2G1' },
 ]
 
 // Banner generation steps
@@ -281,6 +366,12 @@ export function CreativeStudio() {
   const [searchQuery, setSearchQuery] = useState('')
   const [assetChannelFilter, setAssetChannelFilter] = useState('All')
   const [assetStatusFilter, setAssetStatusFilter] = useState('All')
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false)
+  const [showChannelDropdown, setShowChannelDropdown] = useState(false)
+  const [showAssetStatusDropdown, setShowAssetStatusDropdown] = useState(false)
+  const statusDropdownRef = useRef<HTMLDivElement>(null)
+  const channelDropdownRef = useRef<HTMLDivElement>(null)
+  const assetStatusDropdownRef = useRef<HTMLDivElement>(null)
   
   // Change intent state
   const [showChangeIntent, setShowChangeIntent] = useState(false)
@@ -320,6 +411,15 @@ export function CreativeStudio() {
       }
       if (promoDropdownRef.current && !promoDropdownRef.current.contains(event.target as Node)) {
         setShowPromoDropdown(false)
+      }
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
+        setShowStatusDropdown(false)
+      }
+      if (channelDropdownRef.current && !channelDropdownRef.current.contains(event.target as Node)) {
+        setShowChannelDropdown(false)
+      }
+      if (assetStatusDropdownRef.current && !assetStatusDropdownRef.current.contains(event.target as Node)) {
+        setShowAssetStatusDropdown(false)
       }
     }
 
@@ -909,15 +1009,48 @@ export function CreativeStudio() {
                     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search campaigns..."
                       className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm w-64 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 shadow-sm" />
                   </div>
-                  <div className="relative">
-                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 appearance-none pr-10 shadow-sm">
-                      <option value="All">All Status</option>
-                      <option value="Approved">Approved</option>
-                      <option value="Needs Update">Needs Update</option>
-                      <option value="Draft">Draft</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <div className="relative" ref={statusDropdownRef}>
+                    <button
+                      onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm hover:border-violet-300 hover:bg-violet-50/30 transition-all shadow-sm min-w-[140px] justify-between"
+                    >
+                      <span className={cn("font-medium", statusFilter !== 'All' ? 'text-violet-600' : 'text-slate-600')}>
+                        {statusFilter === 'All' ? 'All Status' : statusFilter}
+                      </span>
+                      <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform duration-200", showStatusDropdown && "rotate-180")} />
+                    </button>
+                    <AnimatePresence>
+                      {showStatusDropdown && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                          transition={{ duration: 0.15, ease: 'easeOut' }}
+                          className="absolute top-full left-0 mt-1.5 w-48 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden z-50"
+                        >
+                          {['All', 'Approved', 'Needs Update', 'Draft', 'In Progress'].map(option => (
+                            <button
+                              key={option}
+                              onClick={() => { setStatusFilter(option); setShowStatusDropdown(false) }}
+                              className={cn(
+                                "w-full text-left px-4 py-2.5 text-sm flex items-center gap-2.5 transition-colors",
+                                statusFilter === option
+                                  ? "bg-violet-50 text-violet-700 font-medium"
+                                  : "text-slate-600 hover:bg-slate-50"
+                              )}
+                            >
+                              {statusFilter === option && <Check className="w-3.5 h-3.5 text-violet-500" />}
+                              {statusFilter !== option && <span className="w-3.5" />}
+                              <span>{option === 'All' ? 'All Status' : option}</span>
+                              {option === 'Approved' && <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400" />}
+                              {option === 'Needs Update' && <span className="ml-auto w-2 h-2 rounded-full bg-amber-400" />}
+                              {option === 'Draft' && <span className="ml-auto w-2 h-2 rounded-full bg-blue-400" />}
+                              {option === 'In Progress' && <span className="ml-auto w-2 h-2 rounded-full bg-slate-400" />}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
                 <p className="text-sm text-slate-500">{filteredCampaigns.length} creative campaigns</p>
@@ -929,16 +1062,16 @@ export function CreativeStudio() {
                   <motion.div key={campaign.id} whileHover={{ y: -4 }} onClick={() => { setSelectedCampaign(campaign); setViewMode('review') }}
                     className="bg-white rounded-2xl border border-slate-200 overflow-hidden cursor-pointer hover:shadow-xl hover:border-violet-200 transition-all group">
                     {/* Thumbnail */}
-                    <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
-                      <img src={campaign.thumbnail} alt={campaign.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="aspect-[16/9] bg-slate-900 relative overflow-hidden">
+                      <img src={campaign.thumbnail} alt={campaign.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                       <div className="absolute top-3 right-3">
                         <Badge className={cn('text-xs border shadow-sm', getStatusColor(campaign.status))}>{campaign.status}</Badge>
                       </div>
-                      {/* Product thumbnails */}
-                      <div className="absolute bottom-3 left-3 flex -space-x-2">
-                        {campaign.products.slice(0, 3).map((product, i) => (
-                          <img key={i} src={product.image} alt={product.name} className="w-8 h-8 rounded-lg border-2 border-white object-cover shadow-sm" />
+                      {/* Product labels */}
+                      <div className="absolute bottom-3 left-3 flex gap-1.5">
+                        {campaign.products.slice(0, 2).map((product, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-black/60 backdrop-blur-sm text-white text-[10px] rounded-md border border-white/20 truncate max-w-[120px]">{product.name}</span>
                         ))}
                       </div>
                     </div>
@@ -994,11 +1127,11 @@ export function CreativeStudio() {
                       </div>
                       <div>
                         <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Products</p>
-                        <div className="flex gap-2 mt-2">
+                        <div className="space-y-1.5 mt-2">
                           {selectedCampaign.products.map((product, i) => (
-                            <div key={i} className="text-center">
-                              <img src={product.image} alt={product.name} className="w-12 h-12 rounded-lg object-cover border border-slate-200" />
-                              <p className="text-xs text-slate-500 mt-1 truncate w-12">{product.name.split(' ')[0]}</p>
+                            <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 bg-slate-50 rounded-lg">
+                              <div className="w-2 h-2 rounded-full bg-violet-400 flex-shrink-0" />
+                              <p className="text-xs text-slate-700 font-medium">{product.name}</p>
                             </div>
                           ))}
                         </div>
@@ -1036,12 +1169,90 @@ export function CreativeStudio() {
                       </div>
                       <div className="flex items-center gap-3">
                         <Filter className="w-4 h-4 text-slate-400" />
-                        <select value={assetChannelFilter} onChange={(e) => setAssetChannelFilter(e.target.value)} className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
-                          <option value="All">All Channels</option><option value="Web">Web</option><option value="Social">Social</option><option value="Email">Email</option>
-                        </select>
-                        <select value={assetStatusFilter} onChange={(e) => setAssetStatusFilter(e.target.value)} className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
-                          <option value="All">All Status</option><option value="Approved">Approved</option><option value="Needs Update">Needs Update</option><option value="Draft">Draft</option>
-                        </select>
+                        {/* Channel Filter Dropdown */}
+                        <div className="relative" ref={channelDropdownRef}>
+                          <button
+                            onClick={() => setShowChannelDropdown(!showChannelDropdown)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs hover:border-violet-300 hover:bg-violet-50/30 transition-all min-w-[120px] justify-between"
+                          >
+                            <span className={cn("font-medium", assetChannelFilter !== 'All' ? 'text-violet-600' : 'text-slate-600')}>
+                              {assetChannelFilter === 'All' ? 'All Channels' : assetChannelFilter}
+                            </span>
+                            <ChevronDown className={cn("w-3 h-3 text-slate-400 transition-transform duration-200", showChannelDropdown && "rotate-180")} />
+                          </button>
+                          <AnimatePresence>
+                            {showChannelDropdown && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                                transition={{ duration: 0.15, ease: 'easeOut' }}
+                                className="absolute top-full right-0 mt-1.5 w-40 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden z-50"
+                              >
+                                {['All', 'Web', 'Social', 'Email', 'Push'].map(option => (
+                                  <button
+                                    key={option}
+                                    onClick={() => { setAssetChannelFilter(option); setShowChannelDropdown(false) }}
+                                    className={cn(
+                                      "w-full text-left px-3.5 py-2 text-xs flex items-center gap-2 transition-colors",
+                                      assetChannelFilter === option
+                                        ? "bg-violet-50 text-violet-700 font-medium"
+                                        : "text-slate-600 hover:bg-slate-50"
+                                    )}
+                                  >
+                                    {assetChannelFilter === option && <Check className="w-3 h-3 text-violet-500" />}
+                                    {assetChannelFilter !== option && <span className="w-3" />}
+                                    <span>{option === 'All' ? 'All Channels' : option}</span>
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                        {/* Asset Status Filter Dropdown */}
+                        <div className="relative" ref={assetStatusDropdownRef}>
+                          <button
+                            onClick={() => setShowAssetStatusDropdown(!showAssetStatusDropdown)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs hover:border-violet-300 hover:bg-violet-50/30 transition-all min-w-[110px] justify-between"
+                          >
+                            <span className={cn("font-medium", assetStatusFilter !== 'All' ? 'text-violet-600' : 'text-slate-600')}>
+                              {assetStatusFilter === 'All' ? 'All Status' : assetStatusFilter}
+                            </span>
+                            <ChevronDown className={cn("w-3 h-3 text-slate-400 transition-transform duration-200", showAssetStatusDropdown && "rotate-180")} />
+                          </button>
+                          <AnimatePresence>
+                            {showAssetStatusDropdown && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                                transition={{ duration: 0.15, ease: 'easeOut' }}
+                                className="absolute top-full right-0 mt-1.5 w-40 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden z-50"
+                              >
+                                {['All', 'Approved', 'Needs Update', 'Draft', 'In Progress'].map(option => (
+                                  <button
+                                    key={option}
+                                    onClick={() => { setAssetStatusFilter(option); setShowAssetStatusDropdown(false) }}
+                                    className={cn(
+                                      "w-full text-left px-3.5 py-2 text-xs flex items-center gap-2 transition-colors",
+                                      assetStatusFilter === option
+                                        ? "bg-violet-50 text-violet-700 font-medium"
+                                        : "text-slate-600 hover:bg-slate-50"
+                                    )}
+                                  >
+                                    {assetStatusFilter === option && <Check className="w-3 h-3 text-violet-500" />}
+                                    {assetStatusFilter !== option && <span className="w-3" />}
+                                    <span>{option === 'All' ? 'All Status' : option}</span>
+                                    {option === 'Approved' && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                                    {option === 'Needs Update' && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                                    {option === 'Draft' && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400" />}
+                                    {option === 'In Progress' && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-slate-400" />}
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </div>
                     </div>
                     <div className="p-6 grid grid-cols-3 gap-4">
@@ -1050,8 +1261,8 @@ export function CreativeStudio() {
                         const isSelected = selectedAssets.includes(asset.id)
                         return (
                           <div key={asset.id} className={cn('bg-slate-50 rounded-xl overflow-hidden border-2 transition-all cursor-pointer', isSelected ? 'border-violet-500 shadow-lg' : 'border-transparent hover:border-violet-200')}>
-                            <div className="relative aspect-video bg-slate-200">
-                              <img src={asset.thumbnail} alt={asset.headline} className="w-full h-full object-cover" />
+                            <div className="relative aspect-video bg-slate-900">
+                              <img src={asset.thumbnail} alt={asset.headline} className="w-full h-full object-contain" />
                               <button onClick={(e) => { e.stopPropagation(); setSelectedAssets(prev => prev.includes(asset.id) ? prev.filter(id => id !== asset.id) : [...prev, asset.id]) }}
                                 className={cn('absolute top-2 left-2 w-6 h-6 rounded-md border-2 flex items-center justify-center', isSelected ? 'bg-violet-500 border-violet-500' : 'bg-white/90 border-slate-300')}>
                                 {isSelected && <Check className="w-4 h-4 text-white" />}

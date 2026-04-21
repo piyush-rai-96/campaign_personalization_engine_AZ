@@ -1,0 +1,207 @@
+{
+  "segments": [
+    {
+      "type": "PRO",
+      "sub_segments": [
+        {
+          "segment_name": "Pro – High-Value Shops",
+          "segment_id": "PRO_001",
+          "created_by": "System",
+          "method": "Statistical",
+          "nature": "Dynamic",
+          "channel": "Omni",
+          "definition_summary": "Repair shops with high purchase frequency, large basket sizes, and repeat buying across core parts categories.",
+          "logic_summary": "Customers with >15 monthly orders, high AOV, and consistent purchases in Braking, Engine, and Filters.",
+          "filters": {
+            "purchase_frequency_per_month": ">15",
+            "avg_order_value": ">300",
+            "categories": ["Braking", "Engine", "Filters and PCV"],
+            "account_type": "Business"
+          },
+          "features_used": [
+            "Purchase frequency",
+            "Average order value",
+            "Category affinity",
+            "Account type"
+          ],
+          "estimated_size": 18000,
+          "last_refreshed": "2024-12-10",
+          "campaign_usage": {
+            "total": 25,
+            "active": 10,
+            "completed": 15
+          },
+          "primary_intent": "Retention"
+        },
+        {
+          "segment_name": "Pro – Fleet Operators",
+          "segment_id": "PRO_002",
+          "created_by": "System",
+          "method": "Rule-Based",
+          "nature": "Dynamic",
+          "channel": "Omni",
+          "definition_summary": "Fleet operators purchasing in bulk for maintenance across multiple vehicles.",
+          "logic_summary": "Customers purchasing high volumes of Oil, Filters, and Braking components with bulk order patterns.",
+          "filters": {
+            "bulk_orders": true,
+            "categories": ["Oil and Lubricants", "Filters and PCV", "Braking"],
+            "order_quantity": ">20 units/order"
+          },
+          "features_used": [
+            "Order quantity",
+            "Category mix",
+            "Repeat purchase cycle"
+          ],
+          "estimated_size": 12000,
+          "last_refreshed": "2024-12-10",
+          "campaign_usage": {
+            "total": 18,
+            "active": 7,
+            "completed": 11
+          },
+          "primary_intent": "Volume Growth"
+        },
+        {
+          "segment_name": "Pro – Emergency Restock Buyers",
+          "segment_id": "PRO_003",
+          "created_by": "System",
+          "method": "Statistical",
+          "nature": "Dynamic",
+          "channel": "Omni",
+          "definition_summary": "Workshops making urgent, time-sensitive purchases for immediate repairs.",
+          "logic_summary": "Frequent same-day or rush purchases across critical repair categories.",
+          "filters": {
+            "delivery_type": "Same Day / Rush",
+            "categories": ["Engine", "Cooling and Climate Control", "Electrical"],
+            "order_time_pattern": "Urgent"
+          },
+          "features_used": [
+            "Delivery speed",
+            "Purchase timing",
+            "Category urgency"
+          ],
+          "estimated_size": 9000,
+          "last_refreshed": "2024-12-10",
+          "campaign_usage": {
+            "total": 12,
+            "active": 5,
+            "completed": 7
+          },
+          "primary_intent": "Availability"
+        }
+      ]
+    },
+    {
+      "type": "DIY",
+      "sub_segments": [
+        {
+          "segment_name": "DIY – Enthusiasts / Performance Modders",
+          "segment_id": "DIY_001",
+          "created_by": "System",
+          "method": "Statistical",
+          "nature": "Dynamic",
+          "channel": "Online",
+          "definition_summary": "Car enthusiasts focused on performance upgrades and modifications.",
+          "logic_summary": "Customers purchasing performance parts, upgrades, and accessories frequently.",
+          "filters": {
+            "categories": ["Performance and Racing", "Air Intake", "Exhaust"],
+            "purchase_frequency": ">5 per quarter"
+          },
+          "features_used": [
+            "Category affinity",
+            "Purchase frequency",
+            "Product type"
+          ],
+          "estimated_size": 22000,
+          "last_refreshed": "2024-12-10",
+          "campaign_usage": {
+            "total": 20,
+            "active": 8,
+            "completed": 12
+          },
+          "primary_intent": "Upsell"
+        },
+        {
+          "segment_name": "DIY – Routine Maintenance Buyers",
+          "segment_id": "DIY_002",
+          "created_by": "System",
+          "method": "Rule-Based",
+          "nature": "Dynamic",
+          "channel": "Omni",
+          "definition_summary": "Customers regularly maintaining their vehicles with basic parts and fluids.",
+          "logic_summary": "Repeat purchases of oil, filters, and wipers in predictable intervals.",
+          "filters": {
+            "categories": ["Oil and Lubricants", "Filters and PCV", "Wipers and Related"],
+            "purchase_cycle": "Every 3-6 months"
+          },
+          "features_used": [
+            "Purchase cycle",
+            "Category mix",
+            "Recency"
+          ],
+          "estimated_size": 45000,
+          "last_refreshed": "2024-12-10",
+          "campaign_usage": {
+            "total": 30,
+            "active": 12,
+            "completed": 18
+          },
+          "primary_intent": "Retention"
+        },
+        {
+          "segment_name": "DIY – Price Sensitive Shoppers",
+          "segment_id": "DIY_003",
+          "created_by": "System",
+          "method": "Statistical",
+          "nature": "Dynamic",
+          "channel": "Online",
+          "definition_summary": "Customers highly responsive to discounts and promotions.",
+          "logic_summary": "High engagement during promo events with low full-price purchases.",
+          "filters": {
+            "discount_usage": ">70%",
+            "promo_engagement": "High"
+          },
+          "features_used": [
+            "Promo usage",
+            "Discount sensitivity",
+            "Conversion rate"
+          ],
+          "estimated_size": 38000,
+          "last_refreshed": "2024-12-10",
+          "campaign_usage": {
+            "total": 22,
+            "active": 9,
+            "completed": 13
+          },
+          "primary_intent": "Conversion"
+        },
+        {
+          "segment_name": "DIY – First-Time Buyers",
+          "segment_id": "DIY_004",
+          "created_by": "System",
+          "method": "Rule-Based",
+          "nature": "Static",
+          "channel": "Online",
+          "definition_summary": "New customers making their first purchase in the platform.",
+          "logic_summary": "Customers with 1 completed order in the last 30 days.",
+          "filters": {
+            "purchase_count": "=1",
+            "recency": "<30 days"
+          },
+          "features_used": [
+            "Recency",
+            "Purchase count"
+          ],
+          "estimated_size": 27000,
+          "last_refreshed": "2024-12-10",
+          "campaign_usage": {
+            "total": 10,
+            "active": 4,
+            "completed": 6
+          },
+          "primary_intent": "Activation"
+        }
+      ]
+    }
+  ]
+}

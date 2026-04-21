@@ -1,0 +1,209 @@
+[
+  {
+    "promotion": "$4.99 + 300 Bonus Points on Purple Power Cleaner/Degreaser",
+    "offer_type": "Bundle + Rewards",
+    "discount": "$4.99 + 300 Points",
+    "scope": "Product: Purple Power Cleaner/Degreaser",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Fluids and Chemicals"
+  },
+  {
+    "promotion": "$5 Gift Card + 200 Bonus Points on Armor All",
+    "offer_type": "Gift Card + Rewards",
+    "discount": "$5 Gift Card + 200 Points",
+    "scope": "Category: Armor All Products (min spend $15)",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Appearance and Paint"
+  },
+  {
+    "promotion": "Save $10 + 200 Bonus Points on Innova Wireless Code Scanner",
+    "offer_type": "$ Off + Rewards",
+    "discount": "$10 + 200 Points",
+    "scope": "Product: Innova Scanner",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Tools"
+  },
+  {
+    "promotion": "$8.99 + 2X Bonus Points on Chevron Techron Fuel System Cleaner",
+    "offer_type": "Price + Multiplier Rewards",
+    "discount": "$8.99 + 2X Points",
+    "scope": "Product: Fuel System Cleaner",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Fuel and Emissions System"
+  },
+  {
+    "promotion": "$8.99 + 2X Bonus Points on WD-40 Smart Straw",
+    "offer_type": "Price + Multiplier Rewards",
+    "discount": "$8.99 + 2X Points",
+    "scope": "Product: WD-40",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Fluids and Chemicals"
+  },
+  {
+    "promotion": "50 Bonus Points on Valvoline Motorcycle Oil Quarts",
+    "offer_type": "Rewards",
+    "discount": "50 Points",
+    "scope": "Product: Valvoline Motorcycle Oil",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Oil and Lubricants"
+  },
+  {
+    "promotion": "Buy One, Get One FREE + 2X Bonus Points on STP Octane Booster",
+    "offer_type": "BOGO + Rewards",
+    "discount": "Buy 1 Get 1 Free + 2X Points",
+    "scope": "Product: STP Octane Booster",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Fuel and Emissions System"
+  },
+  {
+    "promotion": "$7.99 + 2X Bonus Points on TruFuel Premixed Engine Fuel",
+    "offer_type": "Price + Multiplier Rewards",
+    "discount": "$7.99 + 2X Points",
+    "scope": "Product: TruFuel",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Lawn and Garden"
+  },
+  {
+    "promotion": "Save $2 + 2X Bonus Points on Lucas Chain Lube",
+    "offer_type": "$ Off + Rewards",
+    "discount": "$2 + 2X Points",
+    "scope": "Product: Chain Lube",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Oil and Lubricants"
+  },
+  {
+    "promotion": "Garage of Legends Sweepstakes",
+    "offer_type": "Sweepstakes",
+    "discount": "Win up to $25,000",
+    "scope": "Campaign / Event",
+    "channel": "Loyalty",
+    "season": "Spring",
+    "category": "Accessories"
+  },
+  {
+    "promotion": "Save up to $50 on Select Cold Air Intakes",
+    "offer_type": "$ Off",
+    "discount": "Up to $50",
+    "scope": "Category: Cold Air Intakes (K&N, Spectre)",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Air Intake"
+  },
+  {
+    "promotion": "Buy One, Get One 50% OFF on Meguiar's Ultimate Products",
+    "offer_type": "BOGO",
+    "discount": "50% Off Second Item",
+    "scope": "Category: Meguiar's Products",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Appearance and Paint"
+  },
+  {
+    "promotion": "Buy One, Get One 50% OFF on New Appearance Products",
+    "offer_type": "BOGO",
+    "discount": "50% Off Second Item",
+    "scope": "Category: Appearance Products",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Appearance and Paint"
+  },
+  {
+    "promotion": "Save $5 by mail when you spend $15 on Armor All",
+    "offer_type": "$ Off (Mail-in Rebate)",
+    "discount": "$5",
+    "scope": "Category: Armor All (min spend $15)",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Appearance and Paint"
+  },
+  {
+    "promotion": "$6 Brake Bundle (Cleaner + Fluid + Lubricant)",
+    "offer_type": "Bundle Price",
+    "discount": "$6 Bundle",
+    "scope": "Product Bundle",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Braking"
+  },
+  {
+    "promotion": "$6 Clean Hands Bundle (Scott Towels + Fast Orange Cleaner)",
+    "offer_type": "Bundle Price",
+    "discount": "$6 Bundle",
+    "scope": "Product Bundle",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Accessories"
+  },
+  {
+    "promotion": "Save $16 on 2 Rain-X Truck & SUV Wiper Blades",
+    "offer_type": "$ Off",
+    "discount": "$16 (on 2)",
+    "scope": "Product: Wiper Blades (min qty 2)",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Wipers and Related"
+  },
+  {
+    "promotion": "Save $8 on 2 Bosch FOCUS Front Wiper Blades",
+    "offer_type": "$ Off",
+    "discount": "$8 (on 2)",
+    "scope": "Product: Bosch Wiper Blades (min qty 2)",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Wipers and Related"
+  },
+  {
+    "promotion": "Buy One, Get One FREE on DieHard Power Tools & Batteries",
+    "offer_type": "BOGO",
+    "discount": "Buy 1 Get 1 Free",
+    "scope": "Category: Power Tools & Batteries",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Tools"
+  },
+  {
+    "promotion": "Save up to $8 on 2 Carquest Engine OR Cabin Air Filters",
+    "offer_type": "$ Off",
+    "discount": "Up to $8",
+    "scope": "Category: Engine / Cabin Air Filters",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Filters and PCV"
+  },
+  {
+    "promotion": "Buy One, Get One 50% OFF on Chemical Guys Odor Eliminators",
+    "offer_type": "BOGO",
+    "discount": "50% Off Second Item",
+    "scope": "Product: Odor Eliminators",
+    "channel": "Omnichannel",
+    "season": "Spring",
+    "category": "Interior"
+  },
+  {
+    "promotion": "15% OFF Orders $35+ (Use Code SPRING)",
+    "offer_type": "% Off",
+    "discount": "15%",
+    "scope": "Sitewide (min order $35)",
+    "channel": "Online",
+    "season": "Spring",
+    "category": "Accessories"
+  },
+  {
+    "promotion": "20% OFF Orders $100+ (Use Code SPRING)",
+    "offer_type": "% Off",
+    "discount": "20%",
+    "scope": "Sitewide (min order $100)",
+    "channel": "Online",
+    "season": "Spring",
+    "category": "Accessories"
+  }
+]

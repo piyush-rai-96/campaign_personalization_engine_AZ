@@ -21,7 +21,7 @@ export function Sidebar() {
       initial={false}
       animate={{ width: isExpanded ? 250 : 60 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      className="bg-[#1e2433] h-screen flex flex-col py-4 flex-shrink-0 relative group/sidebar"
+      className="bg-[#1e2433] h-screen flex flex-col py-4 flex-shrink-0 relative group/sidebar z-50"
     >
       {/* Expand/Collapse Toggle */}
       <button
@@ -103,7 +103,7 @@ export function Sidebar() {
             </AnimatePresence>
             {/* Tooltip - only show when collapsed */}
             {!isExpanded && (
-              <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1e2433] text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg border border-white/10">
+              <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1e2433] text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[9999] shadow-lg border border-white/10">
                 {item.label}
               </div>
             )}

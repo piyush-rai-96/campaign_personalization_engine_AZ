@@ -16,18 +16,20 @@ interface CampaignUsageDetails {
   active: number
   completed: number
   lastUsedDate: Date
-  primaryIntent: 'Retention' | 'Win-back' | 'Conversion' | 'Promotion' | 'Acquisition' | 'Loyalty'
+  primaryIntent: 'Retention' | 'Win-back' | 'Conversion' | 'Promotion' | 'Acquisition' | 'Loyalty' | 'Volume Growth' | 'Availability' | 'Upsell' | 'Activation'
 }
 
 interface Segment {
   id: string
   name: string
-  createdBy: 'User' | 'Alan'
+  segmentType: 'PRO' | 'DIY'
+  createdBy: 'User' | 'Alan' | 'System'
   segmentationMethod: 'Rule-Based' | 'Statistical'
   segmentNature: 'Static' | 'Dynamic'
   definitionSummary: string
+  logicSummary: string
   category: string
-  channel: 'Online' | 'Store' | 'Omni'
+  channel: 'Online' | 'Loyalty' | 'Omnichannel'
   campaignUsage: number
   campaignDetails: CampaignUsageDetails
   lastUpdated: Date
@@ -38,137 +40,137 @@ interface Segment {
 }
 
 const mockSegments: Segment[] = [
+  // ── PRO Segments ──
   {
-    id: 'SEG-001',
-    name: 'High-Value Loyalists',
-    createdBy: 'Alan',
+    id: 'PRO_001',
+    name: 'Pro – High-Value Shops',
+    segmentType: 'PRO',
+    createdBy: 'System',
     segmentationMethod: 'Statistical',
     segmentNature: 'Dynamic',
-    definitionSummary: 'Customers with 5+ purchases and high lifetime value, showing consistent engagement patterns',
+    definitionSummary: 'Repair shops with high purchase frequency, large basket sizes, and repeat buying across core parts categories.',
+    logicSummary: 'Customers with >15 monthly orders, high AOV, and consistent purchases in Braking, Engine, and Filters.',
     category: 'Retention',
-    channel: 'Omni',
-    campaignUsage: 12,
-    campaignDetails: { total: 12, active: 4, completed: 8, lastUsedDate: new Date('2024-12-15'), primaryIntent: 'Retention' },
-    lastUpdated: new Date('2024-12-10'),
-    estimatedSize: 45000,
+    channel: 'Omnichannel',
+    campaignUsage: 25,
+    campaignDetails: { total: 25, active: 10, completed: 15, lastUsedDate: new Date('2026-04-18'), primaryIntent: 'Retention' },
+    lastUpdated: new Date('2026-04-20'),
+    estimatedSize: 18000,
     status: 'Active',
-    features: ['Purchase frequency', 'Average order value', 'Engagement score', 'Tenure'],
+    features: ['Purchase frequency', 'Average order value', 'Category affinity', 'Account type'],
   },
   {
-    id: 'SEG-002',
-    name: 'At-Risk Churners',
-    createdBy: 'Alan',
-    segmentationMethod: 'Statistical',
-    segmentNature: 'Dynamic',
-    definitionSummary: 'Previously active customers showing disengagement signals in the last 60 days',
-    category: 'Win-back',
-    channel: 'Online',
-    campaignUsage: 8,
-    campaignDetails: { total: 8, active: 3, completed: 5, lastUsedDate: new Date('2024-12-12'), primaryIntent: 'Win-back' },
-    lastUpdated: new Date('2024-12-08'),
-    estimatedSize: 28000,
-    status: 'Active',
-    features: ['Days since last purchase', 'Email open rate decline', 'Browse frequency drop'],
-  },
-  {
-    id: 'SEG-003',
-    name: 'New Subscribers',
-    createdBy: 'User',
+    id: 'PRO_002',
+    name: 'Pro – Fleet Operators',
+    segmentType: 'PRO',
+    createdBy: 'System',
     segmentationMethod: 'Rule-Based',
-    segmentNature: 'Static',
-    definitionSummary: 'Recently joined customers in the last 30 days ready for first purchase',
-    category: 'Acquisition',
-    channel: 'Online',
-    campaignUsage: 5,
-    campaignDetails: { total: 5, active: 2, completed: 3, lastUsedDate: new Date('2024-12-05'), primaryIntent: 'Acquisition' },
-    lastUpdated: new Date('2024-12-05'),
+    segmentNature: 'Dynamic',
+    definitionSummary: 'Fleet operators purchasing in bulk for maintenance across multiple vehicles.',
+    logicSummary: 'Customers purchasing high volumes of Oil, Filters, and Braking components with bulk order patterns.',
+    category: 'Volume Growth',
+    channel: 'Omnichannel',
+    campaignUsage: 18,
+    campaignDetails: { total: 18, active: 7, completed: 11, lastUsedDate: new Date('2026-03-28'), primaryIntent: 'Volume Growth' },
+    lastUpdated: new Date('2026-03-30'),
     estimatedSize: 12000,
     status: 'Active',
-    rules: ['Signup date within 30 days', 'No purchase history', 'Email verified'],
+    rules: ['Bulk orders = true', 'Categories: Oil and Lubricants, Filters and PCV, Braking', 'Order quantity > 20 units/order'],
   },
   {
-    id: 'SEG-004',
-    name: 'VIP Customers',
-    createdBy: 'User',
-    segmentationMethod: 'Rule-Based',
+    id: 'PRO_003',
+    name: 'Pro – Emergency Restock Buyers',
+    segmentType: 'PRO',
+    createdBy: 'System',
+    segmentationMethod: 'Statistical',
     segmentNature: 'Dynamic',
-    definitionSummary: 'Top 5% customers by lifetime value with premium tier membership',
-    category: 'Loyalty',
-    channel: 'Omni',
-    campaignUsage: 15,
-    campaignDetails: { total: 15, active: 6, completed: 9, lastUsedDate: new Date('2024-12-16'), primaryIntent: 'Loyalty' },
-    lastUpdated: new Date('2024-12-12'),
-    estimatedSize: 8500,
+    definitionSummary: 'Workshops making urgent, time-sensitive purchases for immediate repairs.',
+    logicSummary: 'Frequent same-day or rush purchases across critical repair categories.',
+    category: 'Availability',
+    channel: 'Omnichannel',
+    campaignUsage: 12,
+    campaignDetails: { total: 12, active: 5, completed: 7, lastUsedDate: new Date('2026-02-20'), primaryIntent: 'Availability' },
+    lastUpdated: new Date('2026-02-22'),
+    estimatedSize: 9000,
     status: 'Active',
-    rules: ['LTV > $5000', 'Membership tier = Premium', 'Active in last 90 days'],
+    features: ['Delivery speed', 'Purchase timing', 'Category urgency'],
   },
+  // ── DIY Segments ──
   {
-    id: 'SEG-005',
-    name: 'Cart Abandoners',
-    createdBy: 'Alan',
-    segmentationMethod: 'Rule-Based',
+    id: 'DIY_001',
+    name: 'DIY – Enthusiasts / Performance Modders',
+    segmentType: 'DIY',
+    createdBy: 'System',
+    segmentationMethod: 'Statistical',
     segmentNature: 'Dynamic',
-    definitionSummary: 'Users who added items to cart but did not complete purchase within 24 hours',
-    category: 'Conversion',
+    definitionSummary: 'Car enthusiasts focused on performance upgrades and modifications.',
+    logicSummary: 'Customers purchasing performance parts, upgrades, and accessories frequently.',
+    category: 'Upsell',
     channel: 'Online',
     campaignUsage: 20,
-    campaignDetails: { total: 20, active: 8, completed: 12, lastUsedDate: new Date('2024-12-17'), primaryIntent: 'Conversion' },
-    lastUpdated: new Date('2024-12-14'),
-    estimatedSize: 35000,
+    campaignDetails: { total: 20, active: 8, completed: 12, lastUsedDate: new Date('2026-04-10'), primaryIntent: 'Upsell' },
+    lastUpdated: new Date('2026-04-12'),
+    estimatedSize: 22000,
     status: 'Active',
-    rules: ['Cart value > $0', 'No checkout completion', 'Time since cart > 24h'],
+    features: ['Category affinity', 'Purchase frequency', 'Product type'],
   },
   {
-    id: 'SEG-006',
-    name: 'Store-Only Shoppers',
-    createdBy: 'User',
+    id: 'DIY_002',
+    name: 'DIY – Routine Maintenance Buyers',
+    segmentType: 'DIY',
+    createdBy: 'System',
+    segmentationMethod: 'Rule-Based',
+    segmentNature: 'Dynamic',
+    definitionSummary: 'Customers regularly maintaining their vehicles with basic parts and fluids.',
+    logicSummary: 'Repeat purchases of oil, filters, and wipers in predictable intervals.',
+    category: 'Retention',
+    channel: 'Omnichannel',
+    campaignUsage: 30,
+    campaignDetails: { total: 30, active: 12, completed: 18, lastUsedDate: new Date('2026-03-15'), primaryIntent: 'Retention' },
+    lastUpdated: new Date('2026-03-18'),
+    estimatedSize: 45000,
+    status: 'Active',
+    rules: ['Categories: Oil and Lubricants, Filters and PCV, Wipers and Related', 'Purchase cycle: Every 3-6 months'],
+  },
+  {
+    id: 'DIY_003',
+    name: 'DIY – Price Sensitive Shoppers',
+    segmentType: 'DIY',
+    createdBy: 'System',
+    segmentationMethod: 'Statistical',
+    segmentNature: 'Dynamic',
+    definitionSummary: 'Customers highly responsive to discounts and promotions.',
+    logicSummary: 'High engagement during promo events with low full-price purchases.',
+    category: 'Conversion',
+    channel: 'Online',
+    campaignUsage: 22,
+    campaignDetails: { total: 22, active: 9, completed: 13, lastUsedDate: new Date('2026-04-05'), primaryIntent: 'Conversion' },
+    lastUpdated: new Date('2026-04-08'),
+    estimatedSize: 38000,
+    status: 'Active',
+    features: ['Promo usage', 'Discount sensitivity', 'Conversion rate'],
+  },
+  {
+    id: 'DIY_004',
+    name: 'DIY – First-Time Buyers',
+    segmentType: 'DIY',
+    createdBy: 'System',
     segmentationMethod: 'Rule-Based',
     segmentNature: 'Static',
-    definitionSummary: 'Customers who exclusively shop in physical stores with no online activity',
-    category: 'Channel Migration',
-    channel: 'Store',
-    campaignUsage: 3,
-    campaignDetails: { total: 3, active: 1, completed: 2, lastUsedDate: new Date('2024-11-28'), primaryIntent: 'Retention' },
-    lastUpdated: new Date('2024-11-28'),
-    estimatedSize: 52000,
-    status: 'Active',
-    rules: ['Store purchases > 0', 'Online purchases = 0', 'Has email address'],
-  },
-  {
-    id: 'SEG-007',
-    name: 'Seasonal Buyers',
-    createdBy: 'Alan',
-    segmentationMethod: 'Statistical',
-    segmentNature: 'Dynamic',
-    definitionSummary: 'Customers identified with strong seasonal purchase patterns during holidays',
-    category: 'Seasonal',
-    channel: 'Omni',
-    campaignUsage: 6,
-    campaignDetails: { total: 6, active: 2, completed: 4, lastUsedDate: new Date('2024-12-01'), primaryIntent: 'Promotion' },
-    lastUpdated: new Date('2024-12-01'),
-    estimatedSize: 67000,
-    status: 'Active',
-    features: ['Holiday purchase history', 'Seasonal engagement spikes', 'Gift purchase behavior'],
-  },
-  {
-    id: 'SEG-008',
-    name: 'Price Sensitive',
-    createdBy: 'Alan',
-    segmentationMethod: 'Statistical',
-    segmentNature: 'Dynamic',
-    definitionSummary: 'Customers who primarily purchase during promotions and respond to discounts',
-    category: 'Promotion',
+    definitionSummary: 'New customers making their first purchase in the platform.',
+    logicSummary: 'Customers with 1 completed order in the last 30 days.',
+    category: 'Activation',
     channel: 'Online',
-    campaignUsage: 11,
-    campaignDetails: { total: 11, active: 5, completed: 6, lastUsedDate: new Date('2024-12-14'), primaryIntent: 'Promotion' },
-    lastUpdated: new Date('2024-12-09'),
-    estimatedSize: 89000,
+    campaignUsage: 10,
+    campaignDetails: { total: 10, active: 4, completed: 6, lastUsedDate: new Date('2026-02-10'), primaryIntent: 'Activation' },
+    lastUpdated: new Date('2026-02-14'),
+    estimatedSize: 27000,
     status: 'Active',
-    features: ['Promo purchase ratio', 'Coupon redemption rate', 'Price comparison behavior'],
+    rules: ['Purchase count = 1', 'Recency < 30 days'],
   },
 ]
 
-const channels = ['All Channels', 'Online', 'Store', 'Omni']
+const channels = ['All Channels', 'Loyalty', 'Omnichannel', 'Online']
 
 const alanSteps = [
   'Understanding business context',
@@ -182,7 +184,7 @@ const alanSteps = [
 
 export function SegmentLibrary() {
   // Filter states
-  const [creationModeFilter, setCreationModeFilter] = useState<'all' | 'Manual' | 'Alan'>('all')
+  const [creationModeFilter, setCreationModeFilter] = useState<'all' | 'Manual' | 'Alan' | 'System'>('all')
   const [methodFilter, setMethodFilter] = useState<'all' | 'Rule-Based' | 'Statistical'>('all')
   const [natureFilter, setNatureFilter] = useState<'all' | 'Static' | 'Dynamic'>('all')
   const [channelFilter, setChannelFilter] = useState('All Channels')
@@ -224,7 +226,7 @@ export function SegmentLibrary() {
   const [clusterCount, setClusterCount] = useState(5)
   const [segmentName, setSegmentName] = useState('')
   const [segmentNature, setSegmentNature] = useState<'Static' | 'Dynamic'>('Dynamic')
-  const [segmentChannel, setSegmentChannel] = useState<'Online' | 'Store' | 'Omni'>('Omni')
+  const [segmentChannel, setSegmentChannel] = useState<'Online' | 'Loyalty' | 'Omnichannel'>('Omnichannel')
   // Rule definition state
   const [ruleDefinitionMode, setRuleDefinitionMode] = useState<'manual' | 'auto' | null>(null)
   const [autoRulesGenerated, setAutoRulesGenerated] = useState(false)
@@ -301,7 +303,7 @@ export function SegmentLibrary() {
     setClusterCount(5)
     setSegmentName('')
     setSegmentNature('Dynamic')
-    setSegmentChannel('Omni')
+    setSegmentChannel('Omnichannel')
     setRuleConditions([{ field: '', operator: 'equals', value: '' }])
     setRuleDefinitionMode(null)
     setAutoRulesGenerated(false)
@@ -323,7 +325,8 @@ export function SegmentLibrary() {
   const filteredSegments = mockSegments.filter(segment => {
     const matchesCreation = creationModeFilter === 'all' || 
       (creationModeFilter === 'Manual' && segment.createdBy === 'User') ||
-      (creationModeFilter === 'Alan' && segment.createdBy === 'Alan')
+      (creationModeFilter === 'Alan' && segment.createdBy === 'Alan') ||
+      (creationModeFilter === 'System' && segment.createdBy === 'System')
     const matchesMethod = methodFilter === 'all' || segment.segmentationMethod === methodFilter
     const matchesNature = natureFilter === 'all' || segment.segmentNature === natureFilter
     const matchesChannel = channelFilter === 'All Channels' || segment.channel === channelFilter
@@ -525,8 +528,8 @@ export function SegmentLibrary() {
                       {openDropdown === 'creationMode' && (
                         <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
                           className="absolute top-full left-0 right-0 mt-1 bg-surface border border-border rounded-lg shadow-lg z-[9999] overflow-hidden">
-                          {[{ value: 'all', label: 'All Modes' }, { value: 'Manual', label: 'Manual' }, { value: 'Alan', label: 'Alan' }].map((opt) => (
-                            <button key={opt.value} onClick={() => { setCreationModeFilter(opt.value as 'all' | 'Manual' | 'Alan'); setOpenDropdown(null) }}
+                          {[{ value: 'all', label: 'All Modes' }, { value: 'Manual', label: 'Manual' }, { value: 'Alan', label: 'Alan' }, { value: 'System', label: 'System' }].map((opt) => (
+                            <button key={opt.value} onClick={() => { setCreationModeFilter(opt.value as 'all' | 'Manual' | 'Alan' | 'System'); setOpenDropdown(null) }}
                               className={cn('w-full px-4 py-2.5 text-left text-sm hover:bg-surface-secondary transition-colors flex items-center justify-between',
                                 creationModeFilter === opt.value && 'bg-primary/5 text-primary font-medium')}>
                               {opt.label}
@@ -1521,7 +1524,7 @@ export function SegmentLibrary() {
                     <div>
                       <label className="block text-sm font-medium text-text-primary mb-2">Target Channel</label>
                       <div className="grid grid-cols-3 gap-3">
-                        {(['Online', 'Store', 'Omni'] as const).map((ch) => (
+                        {(['Online', 'Loyalty', 'Omnichannel'] as const).map((ch) => (
                           <button key={ch} onClick={() => setSegmentChannel(ch)}
                             className={cn('px-4 py-3 rounded-xl border text-sm font-medium transition-all',
                               segmentChannel === ch ? 'border-primary bg-primary text-white' : 'border-border text-text-secondary hover:border-primary/50')}>
@@ -1575,7 +1578,7 @@ export function SegmentLibrary() {
                     <div>
                       <label className="block text-sm font-medium text-text-primary mb-2">Target Channel</label>
                       <div className="grid grid-cols-3 gap-3">
-                        {(['Online', 'Store', 'Omni'] as const).map((ch) => (
+                        {(['Online', 'Loyalty', 'Omnichannel'] as const).map((ch) => (
                           <button key={ch} onClick={() => setSegmentChannel(ch)}
                             className={cn('px-4 py-3 rounded-xl border text-sm font-medium transition-all',
                               segmentChannel === ch ? 'border-primary bg-primary text-white' : 'border-border text-text-secondary hover:border-primary/50')}>
@@ -1782,7 +1785,7 @@ export function SegmentLibrary() {
                         exit={{ opacity: 0, y: -4 }}
                         className="absolute top-full left-0 right-0 mt-1 bg-surface border border-border rounded-lg shadow-lg z-[9999] overflow-hidden"
                       >
-                        {['Online', 'Store', 'Omni'].map((opt) => (
+                        {['Online', 'Loyalty', 'Omnichannel'].map((opt) => (
                           <button 
                             key={opt} 
                             onClick={() => { setAlanChannel(opt); setOpenDropdown(null) }}
@@ -2007,17 +2010,17 @@ export function SegmentLibrary() {
                 <div>
                   <h4 className="text-sm font-medium text-text-muted mb-3">Logic Summary</h4>
                   <Card className="p-4">
-                    <p className="text-sm text-text-secondary mb-3">{selectedSegment.definitionSummary}</p>
-                    {selectedSegment.rules && (
-                      <div>
-                        <p className="text-xs font-medium text-text-muted mb-2">Rules:</p>
-                        <ul className="space-y-1">{selectedSegment.rules.map((rule, i) => (<li key={i} className="text-sm text-text-secondary flex items-center gap-2"><Check className="w-3 h-3 text-success" />{rule}</li>))}</ul>
-                      </div>
-                    )}
+                    <p className="text-sm text-text-secondary mb-3">{selectedSegment.logicSummary}</p>
                     {selectedSegment.features && (
                       <div>
                         <p className="text-xs font-medium text-text-muted mb-2">Features Used:</p>
                         <ul className="space-y-1">{selectedSegment.features.map((f, i) => (<li key={i} className="text-sm text-text-secondary flex items-center gap-2"><BarChart3 className="w-3 h-3 text-info" />{f}</li>))}</ul>
+                      </div>
+                    )}
+                    {selectedSegment.rules && (
+                      <div className="mt-3">
+                        <p className="text-xs font-medium text-text-muted mb-2">Rules:</p>
+                        <ul className="space-y-1">{selectedSegment.rules.map((rule, i) => (<li key={i} className="text-sm text-text-secondary flex items-center gap-2"><Check className="w-3 h-3 text-success" />{rule}</li>))}</ul>
                       </div>
                     )}
                   </Card>

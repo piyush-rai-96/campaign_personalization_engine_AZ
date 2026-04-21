@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  Plus, Check, Lock, Sparkles, TrendingUp, Users, 
+  Plus, Check, Sparkles, TrendingUp, Users, 
   Loader2, Package, Tag, Palette, Rocket, Edit3, RefreshCw, CheckCircle,
   ChevronRight, Shield, Target, Zap, Eye,
   Calendar, BarChart3, ArrowRight, Search,
@@ -36,11 +36,13 @@ interface Campaign {
   lockedSteps: CampaignStep[]
   stepStates: Record<CampaignStep, StepState>
   goal: string
+  selectedGoalId?: string  // ID of the selected business goal playbook
   category: string | null
+  detectedCategories?: string[]  // All categories detected from goal text
   channel: string | null
   region: string | null
   lookbackWindow: string
-  client?: 'sally' | 'michaels' | 'tsc'  // Client identifier for multi-tenant support
+  client?: 'autoparts'  // Client identifier
   // Audit info
   createdBy: string
   createdAt: Date
@@ -65,6 +67,7 @@ interface Campaign {
   derivedContext?: {
     campaignType: string
     campaignName: string
+    detectedCategories?: string[]
     risks: string[]
     guardrails: string[]
     estimatedUniverse: number
@@ -124,89 +127,95 @@ const createDefaultStepStates = (): Record<CampaignStep, StepState> => ({
   review: { status: 'pending' },
 })
 
-// Mock draft campaigns for demo - Using Sally Beauty Categories & Products
+// Mock draft campaigns for demo - Auto Parts Domain
 const MOCK_DRAFTS: Campaign[] = [
   {
     id: 'CAMP-001',
-    name: 'Hair Color Holiday Refresh',
+    name: 'Winter Vehicle Prep',
     status: 'draft',
     currentStep: 'promo',
     lockedSteps: ['context', 'segment', 'product'],
     stepStates: {
-      context: { status: 'approved', completedAt: new Date('2024-12-15') },
-      segment: { status: 'approved', completedAt: new Date('2024-12-16') },
-      product: { status: 'approved', completedAt: new Date('2024-12-16') },
+      context: { status: 'approved', completedAt: new Date('2026-03-15') },
+      segment: { status: 'approved', completedAt: new Date('2026-03-16') },
+      product: { status: 'approved', completedAt: new Date('2026-03-16') },
       promo: { status: 'ready' },
       creative: { status: 'pending' },
       review: { status: 'pending' },
     },
-    goal: 'Drive Hair Color sales with Wella & Ion products during holiday season while protecting margin',
-    category: 'Hair Color',
-    channel: 'online',
+    goal: 'Drive winter maintenance sales for Oil, Filters, and Wipers while protecting margin on premium brands',
+    category: 'Oil and Lubricants',
+    detectedCategories: ['Oil and Lubricants', 'Filters and PCV', 'Wipers and Related'],
+    channel: 'omni',
     region: 'All US',
     lookbackWindow: 'Last 6 months',
+    client: 'autoparts',
     createdBy: 'John Doe',
-    createdAt: new Date('2024-12-15T09:30:00'),
-    lastSavedAt: new Date('2024-12-17T07:10:00'),
+    createdAt: new Date('2026-03-15T09:30:00'),
+    lastSavedAt: new Date('2026-03-17T07:10:00'),
     lastSavedBy: 'John Doe',
-    lastModifiedAt: new Date('2024-12-17T07:10:00'),
+    lastModifiedAt: new Date('2026-03-17T07:10:00'),
     lastModifiedBy: 'John Doe',
-    customerUniverseSize: 1150000,
-    skuUniverseSize: 2450,
+    customerUniverseSize: 680000,
+    skuUniverseSize: 320,
     progressPercent: 50,
     completedStepsCount: 3,
     derivedContext: {
-      campaignType: 'Holiday Promotion',
-      campaignName: 'Hair Color Holiday Refresh',
-      risks: ['Margin dilution on premium color products', 'Brand perception risk'],
-      guardrails: ['Cap discount at 25% for Wella', 'Exclude new Ion launches'],
-      estimatedUniverse: 1150000,
-      marginProtection: 'flexible',
-      seasonality: 'Holiday',
+      campaignType: 'Seasonal Maintenance',
+      campaignName: 'Winter Vehicle Prep',
+      risks: ['Margin dilution on synthetic oil', 'Overstock on wiper blades post-season'],
+      guardrails: ['Cap discount at 20% for Mobil 1', 'Bundle oil + filter for margin protection', 'Free shipping over $50'],
+      estimatedUniverse: 680000,
+      marginProtection: 'Enabled',
+      seasonality: 'Winter Prep',
       assumptions: [
-        { key: 'Channel', value: 'Online', isAssumed: false },
-        { key: 'Discount flexibility', value: 'Moderate', isAssumed: true },
+        { key: 'Channel', value: 'Omni (DIY Online + PRO Store)', isAssumed: false },
+        { key: 'Discount Strategy', value: 'Tiered: Maintenance 10-20%', isAssumed: true },
+        { key: 'Product Scope', value: 'Oil, Filters, Wipers — Fitment validated', isAssumed: true },
+        { key: 'Urgency', value: 'Seasonal (Winter prep)', isAssumed: true },
       ]
     },
     audienceStrategy: {
       segments: [
-        { id: 'seg-1', name: 'Color Enthusiasts', size: 85000, percentage: 7.4, description: 'Frequent color changers who try new shades', logic: 'statistical' },
-        { id: 'seg-2', name: 'Professional Stylists', size: 140000, percentage: 12.2, description: 'Licensed pros buying for clients', logic: 'rule-based' },
-        { id: 'seg-3', name: 'First-Time Colorists', size: 95000, percentage: 8.3, description: 'New to at-home color, need guidance', logic: 'statistical' },
+        { id: 'seg-cat-1', name: 'DIY Routine Maintenance Buyers', size: 145000, percentage: 24.5, description: 'Regular oil change & filter buyers, 3-6 month cycle, prefer online ordering', logic: 'statistical' },
+        { id: 'seg-cat-2', name: 'DIY Routine Maintenance Buyers', size: 132000, percentage: 26.8, description: 'Regular filter replacements during oil changes, buy combos', logic: 'statistical' },
+        { id: 'seg-cat-3', name: 'DIY Routine Maintenance Buyers', size: 118000, percentage: 28.2, description: 'Seasonal wiper replacements, prefer online purchase + pickup', logic: 'statistical' },
       ],
-      totalCoverage: 27.9,
+      totalCoverage: 79.5,
       segmentationLayers: [
-        { name: 'Lifecycle', type: 'rule-based' },
-        { name: 'Value Tier (RFM)', type: 'statistical' },
-        { name: 'Promo Sensitivity', type: 'statistical' },
-        { name: 'Hair Color Affinity', type: 'rule-based' },
+        { name: 'Customer Type (PRO/DIY)', type: 'rule-based' },
+        { name: 'Purchase Recency', type: 'rule-based' },
+        { name: 'Category Affinity', type: 'statistical' },
+        { name: 'Vehicle Age Bucket', type: 'rule-based' },
       ]
     }
   },
   {
     id: 'CAMP-002',
-    name: 'Styling Tools VIP Loyalty',
+    name: 'Brake System Clearance',
     status: 'draft',
     currentStep: 'segment',
     lockedSteps: ['context'],
     stepStates: {
-      context: { status: 'approved', completedAt: new Date('2024-12-14') },
+      context: { status: 'approved', completedAt: new Date('2026-03-14') },
       segment: { status: 'thinking' },
       product: { status: 'pending' },
       promo: { status: 'pending' },
       creative: { status: 'pending' },
       review: { status: 'pending' },
     },
-    goal: 'Drive repeat purchases of BaBylissPRO & Hot Tools from VIP customers',
-    category: 'Styling Tools',
+    goal: 'Clear overstock brake pads and rotors while cross-selling brake fluid to PRO and DIY segments',
+    category: 'Braking',
+    detectedCategories: ['Braking'],
     channel: 'omni',
-    region: 'North America',
+    region: 'All US',
     lookbackWindow: 'Last 90 days',
+    client: 'autoparts',
     createdBy: 'Sarah Chen',
-    createdAt: new Date('2024-12-14T14:20:00'),
-    lastSavedAt: new Date('2024-12-16T16:45:00'),
+    createdAt: new Date('2026-03-14T14:20:00'),
+    lastSavedAt: new Date('2026-03-16T16:45:00'),
     lastSavedBy: 'Sarah Chen',
-    lastModifiedAt: new Date('2024-12-16T16:45:00'),
+    lastModifiedAt: new Date('2026-03-16T16:45:00'),
     lastModifiedBy: 'Sarah Chen',
     customerUniverseSize: 450000,
     progressPercent: 17,
@@ -217,7 +226,7 @@ const MOCK_DRAFTS: Campaign[] = [
 const MOCK_ACTIVE: Campaign[] = [
   {
     id: 'CAMP-003',
-    name: 'Olaplex Bond Repair Launch',
+    name: 'Battery Season Push',
     status: 'active',
     currentStep: 'review',
     lockedSteps: ['context', 'segment', 'product', 'promo', 'creative', 'review'],
@@ -229,26 +238,28 @@ const MOCK_ACTIVE: Campaign[] = [
       creative: { status: 'approved' },
       review: { status: 'approved' },
     },
-    goal: 'Launch Olaplex Hair Care collection to bond repair seekers',
-    category: 'Hair Care',
+    goal: 'Drive battery replacement sales targeting vehicles 3+ years old before winter',
+    category: 'Battery and Electrical',
+    detectedCategories: ['Battery and Electrical'],
     channel: 'omni',
     region: 'All US',
     lookbackWindow: 'Last 90 days',
+    client: 'autoparts',
     createdBy: 'John Doe',
-    createdAt: new Date('2024-12-01'),
-    lastSavedAt: new Date('2024-12-10'),
+    createdAt: new Date('2026-02-01'),
+    lastSavedAt: new Date('2026-02-10'),
     lastSavedBy: 'John Doe',
-    lastModifiedAt: new Date('2024-12-10'),
+    lastModifiedAt: new Date('2026-02-10'),
     lastModifiedBy: 'John Doe',
-    startDate: new Date('2024-12-15'),
-    endDate: new Date('2024-12-31'),
+    startDate: new Date('2026-02-15'),
+    endDate: new Date('2026-03-31'),
     customerUniverseSize: 320000,
     progressPercent: 100,
     completedStepsCount: 6,
   },
   {
     id: 'CAMP-004',
-    name: 'Nails & Lashes Bundle Promo',
+    name: 'PRO Fleet Oil Program',
     status: 'active',
     currentStep: 'review',
     lockedSteps: ['context', 'segment', 'product', 'promo', 'creative', 'review'],
@@ -260,26 +271,28 @@ const MOCK_ACTIVE: Campaign[] = [
       creative: { status: 'approved' },
       review: { status: 'approved' },
     },
-    goal: 'Cross-sell OPI Nails with Ardell Lashes for holiday glam looks',
-    category: 'Nails',
-    channel: 'online',
+    goal: 'Bulk oil and filter program for fleet operators with volume pricing',
+    category: 'Oil and Lubricants',
+    detectedCategories: ['Oil and Lubricants', 'Filters and PCV'],
+    channel: 'omni',
     region: 'All US',
     lookbackWindow: 'Last 60 days',
+    client: 'autoparts',
     createdBy: 'Maria Lopez',
-    createdAt: new Date('2024-12-05'),
-    lastSavedAt: new Date('2024-12-12'),
+    createdAt: new Date('2026-02-05'),
+    lastSavedAt: new Date('2026-02-12'),
     lastSavedBy: 'Maria Lopez',
-    lastModifiedAt: new Date('2024-12-12'),
+    lastModifiedAt: new Date('2026-02-12'),
     lastModifiedBy: 'Maria Lopez',
-    startDate: new Date('2024-12-10'),
-    endDate: new Date('2024-12-25'),
-    customerUniverseSize: 280000,
+    startDate: new Date('2026-02-10'),
+    endDate: new Date('2026-04-25'),
+    customerUniverseSize: 95000,
     progressPercent: 100,
     completedStepsCount: 6,
   },
   {
     id: 'CAMP-005',
-    name: "Men's Grooming Barber Pro",
+    name: 'Summer Road Trip Prep',
     status: 'active',
     currentStep: 'review',
     lockedSteps: ['context', 'segment', 'product', 'promo', 'creative', 'review'],
@@ -291,26 +304,28 @@ const MOCK_ACTIVE: Campaign[] = [
       creative: { status: 'approved' },
       review: { status: 'approved' },
     },
-    goal: 'Target barber professionals with Andis & Wahl clippers bundle',
-    category: "Men's Grooming",
-    channel: 'omni',
+    goal: 'Drive coolant, AC, and tire care sales ahead of summer road trip season',
+    category: 'Cooling and Heating',
+    detectedCategories: ['Cooling and Heating'],
+    channel: 'online',
     region: 'All US',
     lookbackWindow: 'Last 90 days',
+    client: 'autoparts',
     createdBy: 'James Wilson',
-    createdAt: new Date('2024-12-03'),
-    lastSavedAt: new Date('2024-12-11'),
+    createdAt: new Date('2026-03-03'),
+    lastSavedAt: new Date('2026-03-11'),
     lastSavedBy: 'James Wilson',
-    lastModifiedAt: new Date('2024-12-11'),
+    lastModifiedAt: new Date('2026-03-11'),
     lastModifiedBy: 'James Wilson',
-    startDate: new Date('2024-12-08'),
-    endDate: new Date('2024-12-31'),
-    customerUniverseSize: 165000,
+    startDate: new Date('2026-04-01'),
+    endDate: new Date('2026-06-30'),
+    customerUniverseSize: 410000,
     progressPercent: 100,
     completedStepsCount: 6,
   },
   {
     id: 'CAMP-006',
-    name: 'Textured Hair Care Curl Love',
+    name: 'Emergency Brake Restock',
     status: 'active',
     currentStep: 'review',
     lockedSteps: ['context', 'segment', 'product', 'promo', 'creative', 'review'],
@@ -322,492 +337,459 @@ const MOCK_ACTIVE: Campaign[] = [
       creative: { status: 'approved' },
       review: { status: 'approved' },
     },
-    goal: 'Promote Cantu & Mielle products to curl definers and natural hair lovers',
-    category: 'Textured Hair Care',
-    channel: 'online',
+    goal: 'Target PRO shops needing emergency brake parts restock with fast delivery',
+    category: 'Braking',
+    detectedCategories: ['Braking'],
+    channel: 'omni',
     region: 'All US',
-    lookbackWindow: 'Last 120 days',
+    lookbackWindow: 'Last 30 days',
+    client: 'autoparts',
     createdBy: 'Keisha Brown',
-    createdAt: new Date('2024-12-02'),
-    lastSavedAt: new Date('2024-12-09'),
+    createdAt: new Date('2026-03-02'),
+    lastSavedAt: new Date('2026-03-09'),
     lastSavedBy: 'Keisha Brown',
-    lastModifiedAt: new Date('2024-12-09'),
+    lastModifiedAt: new Date('2026-03-09'),
     lastModifiedBy: 'Keisha Brown',
-    startDate: new Date('2024-12-05'),
-    endDate: new Date('2024-12-28'),
-    customerUniverseSize: 195000,
+    startDate: new Date('2026-03-05'),
+    endDate: new Date('2026-04-28'),
+    customerUniverseSize: 72000,
     progressPercent: 100,
     completedStepsCount: 6,
   }
 ]
 
-const deriveContext = (goal: string, category: string, channel?: string, client?: 'sally' | 'michaels' | 'tsc') => {
+const deriveContext = (goal: string, category: string, channel?: string, _client?: 'autoparts') => {
   const lowerGoal = goal.toLowerCase()
-  const isClearance = lowerGoal.includes('clear') || lowerGoal.includes('inventory') || lowerGoal.includes('excess')
-  const isVIP = lowerGoal.includes('vip')
-  const isRetention = lowerGoal.includes('repeat') || lowerGoal.includes('retention') || lowerGoal.includes('loyalty')
-  const isFullPrice = lowerGoal.includes('full-price') || lowerGoal.includes('sell-through')
-  const isMichaelsHoliday = client === 'michaels' || (lowerGoal.includes('christmas') && lowerGoal.includes('holiday') && client !== 'tsc')
-  const isTSCHoliday = client === 'tsc' || (lowerGoal.includes('farmhouse') || lowerGoal.includes('tsc') || lowerGoal.includes('tractor'))
   
-  // Extract category from goal if not provided
-  let derivedCategory = category || 'General'
+  // 1. Intent Type Detection
+  const isMaintenance = lowerGoal.includes('maintenance') || lowerGoal.includes('oil change') || lowerGoal.includes('routine')
+  const isRepair = lowerGoal.includes('repair') || lowerGoal.includes('replace') || lowerGoal.includes('fix')
+  const isEmergency = lowerGoal.includes('emergency') || lowerGoal.includes('urgent') || lowerGoal.includes('restock')
+  const isUpgrade = lowerGoal.includes('upgrade') || lowerGoal.includes('performance') || lowerGoal.includes('premium')
+  const isSeasonal = lowerGoal.includes('winter') || lowerGoal.includes('summer') || lowerGoal.includes('season')
+  const isClearance = lowerGoal.includes('clear') || lowerGoal.includes('overstock') || lowerGoal.includes('excess')
   
-  // Michaels-specific category detection
-  if (client === 'michaels') {
-    // For Michaels, prioritize Trees if mentioned, otherwise check for Decor
-    if (lowerGoal.includes('tree')) {
-      derivedCategory = 'Christmas Trees'
-    } else if (lowerGoal.includes('decor') || lowerGoal.includes('ornament') || lowerGoal.includes('topper') || lowerGoal.includes('light')) {
-      derivedCategory = 'Christmas Decor Collections'
-    } else {
-      derivedCategory = 'Christmas Trees'
+  // 2. Vehicle Context Detection
+  const isFleet = lowerGoal.includes('fleet')
+  const isPRO = lowerGoal.includes('pro') || lowerGoal.includes('shop') || isFleet
+  
+  // 3. Product Category Mapping — detect ALL mentioned categories
+  const categoryDetectors: { keywords: string[]; category: string }[] = [
+    { keywords: ['oil', 'lubricant', 'synthetic'], category: 'Oil and Lubricants' },
+    { keywords: ['brake', 'pad', 'rotor'], category: 'Braking' },
+    { keywords: ['filter', 'pcv', 'air filter'], category: 'Filters and PCV' },
+    { keywords: ['wiper', 'washer'], category: 'Wipers and Related' },
+    { keywords: ['battery', 'electrical', 'starter'], category: 'Battery and Electrical' },
+    { keywords: ['coolant', 'heating', 'thermostat'], category: 'Cooling and Heating' },
+    { keywords: ['ignition', 'spark', 'coil'], category: 'Ignition and Tune Up' },
+    { keywords: ['exhaust', 'emission'], category: 'Exhaust and Emissions' },
+    { keywords: ['steering', 'suspension'], category: 'Steering and Suspension' },
+    { keywords: ['light', 'bulb', 'headlight'], category: 'Lighting' },
+  ]
+  const detectedCategories: string[] = []
+  for (const detector of categoryDetectors) {
+    if (detector.keywords.some(kw => lowerGoal.includes(kw))) {
+      detectedCategories.push(detector.category)
     }
-  } else if (client === 'tsc') {
-    // TSC-specific category detection
-    if (lowerGoal.includes('christmas') || lowerGoal.includes('holiday')) {
-      derivedCategory = 'Christmas Decor'
-    } else if (lowerGoal.includes('home') || lowerGoal.includes('farmhouse') || lowerGoal.includes('decor')) {
-      derivedCategory = 'Home Decor'
-    } else {
-      derivedCategory = 'Home Decor'
-    }
-  } else {
-    // Sally Beauty / default category detection
-    if (lowerGoal.includes('kids') || lowerGoal.includes('children')) derivedCategory = 'Kids Apparel'
-    else if (lowerGoal.includes('women')) derivedCategory = "Women's"
-    else if (lowerGoal.includes('men') && !lowerGoal.includes('women')) derivedCategory = "Men's"
-    else if (lowerGoal.includes('apparel')) derivedCategory = 'Apparel'
-    else if (lowerGoal.includes('footwear') || lowerGoal.includes('shoes')) derivedCategory = 'Footwear'
-    else if (lowerGoal.includes('electronics')) derivedCategory = 'Electronics'
-    else if (lowerGoal.includes('beauty')) derivedCategory = 'Beauty'
   }
+  // Fallback: use provided category or default
+  if (detectedCategories.length === 0) detectedCategories.push(category || 'Oil and Lubricants')
+  const derivedCategory = detectedCategories[0]
+  
+  // 4. Urgency Level
+  const urgency = isEmergency ? 'Emergency' : (isSeasonal || lowerGoal.includes('mileage') || lowerGoal.includes('fail')) ? 'Triggered' : 'Planned'
+  
+  // 5. Channel Strategy: DIY → Online-first, PRO → Omni + Store priority
+  const channelStrategy = isPRO ? 'Omni (PRO Store Priority)' : 'Online-first (DIY)'
   
   // Determine campaign type and name
-  let campaignType = 'Engagement Campaign'
-  let campaignName = `${derivedCategory} Engagement Campaign`
+  let campaignType = 'Maintenance Campaign'
+  let campaignName = `${derivedCategory} Campaign`
   
-  if (isTSCHoliday && client === 'tsc') {
-    campaignType = 'Holiday Seasonal Sale'
-    campaignName = `TSC ${derivedCategory} Holiday Campaign`
-  } else if (isMichaelsHoliday) {
-    campaignType = 'Holiday Seasonal Sale'
-    campaignName = `Michaels ${derivedCategory} Holiday Campaign`
+  if (isEmergency) {
+    campaignType = 'Emergency Restock'
+    campaignName = `${derivedCategory} Emergency Restock`
   } else if (isClearance) {
     campaignType = 'Clearance Push'
     campaignName = `${derivedCategory} Clearance Campaign`
-  } else if (isVIP && isRetention) {
-    campaignType = 'VIP Retention'
-    campaignName = `${derivedCategory} VIP Retention Campaign`
-  } else if (isRetention) {
-    campaignType = 'Customer Retention'
-    campaignName = `${derivedCategory} Retention Campaign`
-  } else if (isFullPrice) {
-    campaignType = 'Full-Price Promotion'
-    campaignName = `${derivedCategory} Full-Price Campaign`
+  } else if (isSeasonal) {
+    const season = lowerGoal.includes('winter') ? 'Winter' : 'Summer'
+    campaignType = `Seasonal Prep (${season})`
+    campaignName = `${season} ${derivedCategory} Prep`
+  } else if (isUpgrade) {
+    campaignType = 'Performance Upgrade'
+    campaignName = `${derivedCategory} Upgrade Campaign`
+  } else if (isRepair) {
+    campaignType = 'Repair Campaign'
+    campaignName = `${derivedCategory} Repair Campaign`
+  } else if (isMaintenance) {
+    campaignType = 'Routine Maintenance'
+    campaignName = `${derivedCategory} Maintenance Campaign`
   }
   
-  // Derive risks based on campaign type
+  // Derive risks and guardrails
   let risks: string[] = []
   let guardrails: string[] = []
   
-  if (isTSCHoliday && client === 'tsc') {
-    risks = ['Seasonal inventory timing', 'Post-holiday returns', 'Competitor holiday pricing']
-    guardrails = ['60% max discount on decor', 'Bundle home and holiday items', 'Free shipping over $49']
-  } else if (isMichaelsHoliday) {
-    risks = ['Seasonal inventory timing', 'Post-holiday returns', 'Competitor holiday pricing']
-    guardrails = ['60% max discount on trees', 'Bundle decor with trees', 'Free shipping over $50']
-  } else if (isClearance) {
-    risks = ['Margin dilution on high-value items', 'Brand perception risk', 'Cannibalization of full-price']
-    guardrails = ['Cap discount at 40% for premium', 'Exclude new arrivals', 'Min margin: 25%']
-  } else if (isVIP || isRetention) {
-    risks = ['Over-discounting loyal customers', 'Reduced perceived exclusivity', 'Margin erosion on repeat buyers']
-    guardrails = ['Limit discount depth for VIPs', 'Focus on experiential rewards', 'Personalized offers only']
-  } else if (isFullPrice) {
-    risks = ['Lower conversion without discount', 'Competition from clearance', 'Price sensitivity in market']
-    guardrails = ['Focus on value messaging', 'Highlight exclusivity', 'Emphasize quality and newness']
+  if (isClearance) {
+    risks = ['Margin dilution on clearance SKUs', 'Brand perception risk on premium parts', 'Cannibalization of full-price inventory']
+    guardrails = ['40%+ discount only on overstock SKUs', 'Exclude new product launches', 'Min margin: 15%', 'Vehicle fitment validation required']
+  } else if (isEmergency) {
+    risks = ['Supply chain constraints on fast-moving parts', 'Competitor pricing on urgent repairs', 'PRO stock-out risk']
+    guardrails = ['Prioritize high-availability SKUs', 'Same-day pickup required', 'Margin floor at 20%']
+  } else if (isSeasonal) {
+    risks = ['Post-season overstock on seasonal items', 'Weather-dependent demand variance', 'Cross-category cannibalization']
+    guardrails = ['Bundle seasonal items for margin protection', 'Free shipping over $50', 'Cap discount at 20% on premium brands']
+  } else if (isPRO) {
+    risks = ['Volume discount margin erosion', 'Contract pricing complexity', 'Inventory allocation conflicts']
+    guardrails = ['Volume discount tiers with margin floors', 'Contract pricing requires min order', 'Priority stock allocation for PRO']
   } else {
-    risks = ['Lower conversion without discount', 'Competition from clearance']
-    guardrails = ['Focus on value messaging', 'Highlight exclusivity']
+    risks = ['DIY segment price sensitivity', 'Competitor online pricing pressure', 'Fitment accuracy for vehicle-specific parts']
+    guardrails = ['Tiered discounts: 10-20% for maintenance', 'Bundle enforcement for margin protection', 'Fitment validation mandatory']
   }
   
   return {
     campaignType,
     campaignName,
+    detectedCategories,
     risks,
     guardrails,
-    estimatedUniverse: client === 'michaels' ? Math.floor(Math.random() * 50000) + 80000 : client === 'tsc' ? Math.floor(Math.random() * 40000) + 60000 : Math.floor(Math.random() * 100000) + 150000,
-    marginProtection: lowerGoal.includes('margin') || lowerGoal.includes('protect') ? 'Enabled' : null,
-    seasonality: lowerGoal.includes('holiday') || lowerGoal.includes('christmas') ? 'Holiday Season' : lowerGoal.includes('summer') ? 'Summer' : null,
+    estimatedUniverse: Math.floor(Math.random() * 200000) + 200000,
+    marginProtection: lowerGoal.includes('margin') || lowerGoal.includes('protect') ? 'Enabled' : isClearance ? 'Threshold-based' : null,
+    seasonality: isSeasonal ? (lowerGoal.includes('winter') ? 'Winter Prep' : 'Summer Prep') : null,
     assumptions: [
-      { key: 'Channel', value: channel || 'Online + In-Store', isAssumed: !channel },
-      { key: 'Discount flexibility', value: client === 'michaels' || client === 'tsc' ? 'Up to 60% off' : isClearance ? 'Moderate' : isVIP ? 'Conservative' : 'Flexible', isAssumed: true },
-      { key: 'Product focus', value: derivedCategory !== 'General' ? derivedCategory : 'Category-level', isAssumed: true },
-      ...(client === 'michaels' ? [{ key: 'Client', value: 'Michaels', isAssumed: false }] : []),
-      ...(client === 'tsc' ? [{ key: 'Client', value: 'TSC', isAssumed: false }] : []),
+      { key: 'Channel', value: channel || channelStrategy, isAssumed: !channel },
+      { key: 'Discount Strategy', value: isClearance ? 'Clearance: 40%+' : isRepair ? 'Competitive: 20-35%' : 'Maintenance: 10-20%', isAssumed: true },
+      { key: 'Product Scope', value: `${detectedCategories.join(', ')} — Fitment validated`, isAssumed: true },
+      { key: 'Vehicle Fitment', value: 'Include only compatible SKUs', isAssumed: true },
+      { key: 'Urgency', value: urgency, isAssumed: urgency === 'Planned' },
+      { key: 'Customer Split', value: isPRO ? 'PRO-focused' : 'DIY + PRO', isAssumed: true },
     ]
   }
 }
 
-// Category-specific segments
+// Auto Parts Category Segments — PRO/DIY MECE Structure
 const CATEGORY_SEGMENTS: Record<string, { id: string; name: string; size: number; percentage: number; description: string; logic: string }[]> = {
-  'Apparel': [
-    { id: 'seg-1', name: 'Fashion Forward VIPs', size: 52300, percentage: 21.2, description: 'High spenders who buy new arrivals within 2 weeks', logic: 'statistical' },
-    { id: 'seg-2', name: 'Seasonal Shoppers', size: 78400, percentage: 31.8, description: 'Purchase primarily during sales and season changes', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Basics Loyalists', size: 34200, percentage: 13.9, description: 'Repeat buyers of core wardrobe essentials', logic: 'statistical' },
-    { id: 'seg-4', name: 'Trend Explorers', size: 41500, percentage: 16.8, description: 'Browse frequently, buy selectively', logic: 'rule-based' },
+  'Oil and Lubricants': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 145000, percentage: 24.5, description: 'Regular oil change & filter buyers, 3-6 month cycle, prefer online ordering', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Price-Sensitive Promo Buyers', size: 82000, percentage: 13.9, description: 'Wait for promotions, buy bulk synthetic oil when discounted', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 68000, percentage: 11.5, description: 'Independent repair shops with high-frequency bulk orders', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Fleet Operators', size: 42000, percentage: 7.1, description: 'Fleet maintenance teams needing scheduled bulk deliveries', logic: 'rule-based' },
   ],
-  'Electronics': [
-    { id: 'seg-1', name: 'Tech Enthusiasts', size: 38900, percentage: 19.5, description: 'Early adopters who upgrade frequently', logic: 'statistical' },
-    { id: 'seg-2', name: 'Practical Upgraders', size: 67200, percentage: 33.7, description: 'Replace devices when necessary, value reliability', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Accessory Collectors', size: 45600, percentage: 22.9, description: 'Buy add-ons and accessories regularly', logic: 'statistical' },
-    { id: 'seg-4', name: 'Deal Hunters', size: 29800, percentage: 14.9, description: 'Wait for major sales and promotions', logic: 'rule-based' },
+  'Braking': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 98000, percentage: 22.1, description: 'Vehicle owners doing scheduled brake pad replacements, prefer kits', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Urgent Repair Buyers', size: 62000, percentage: 14.0, description: 'Failure-signal triggered buyers needing immediate brake parts', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 85000, percentage: 19.2, description: 'Brake specialist shops with high volume pad & rotor orders', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Emergency Restock Buyers', size: 38000, percentage: 8.6, description: 'Shops needing same-day brake parts for urgent repairs', logic: 'rule-based' },
   ],
-  'Home & Garden': [
-    { id: 'seg-1', name: 'Home Renovators', size: 31200, percentage: 17.4, description: 'Large basket buyers doing room makeovers', logic: 'statistical' },
-    { id: 'seg-2', name: 'Seasonal Decorators', size: 58900, percentage: 32.8, description: 'Update decor with seasons and holidays', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Garden Enthusiasts', size: 42100, percentage: 23.5, description: 'Regular outdoor and plant purchases', logic: 'statistical' },
-    { id: 'seg-4', name: 'Smart Home Adopters', size: 28400, percentage: 15.8, description: 'Interested in connected home devices', logic: 'rule-based' },
+  'Filters and PCV': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 132000, percentage: 26.8, description: 'Regular filter replacements during oil changes, buy combos', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY First-Time Fixers', size: 45000, percentage: 9.1, description: 'New vehicle owners learning basic maintenance, need guidance', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 72000, percentage: 14.6, description: 'Shops ordering bulk filters across multiple fitments', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Fleet Operators', size: 51000, percentage: 10.3, description: 'Fleet teams with standardized filter programs', logic: 'rule-based' },
   ],
-  'Beauty': [
-    { id: 'seg-1', name: 'Beauty Insiders', size: 48700, percentage: 24.1, description: 'Try new products, follow trends', logic: 'statistical' },
-    { id: 'seg-2', name: 'Skincare Devotees', size: 56300, percentage: 27.9, description: 'Consistent skincare routine buyers', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Makeup Enthusiasts', size: 39200, percentage: 19.4, description: 'Color cosmetics collectors', logic: 'statistical' },
-    { id: 'seg-4', name: 'Clean Beauty Seekers', size: 34800, percentage: 17.2, description: 'Prefer natural and organic products', logic: 'rule-based' },
+  'Wipers and Related': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 118000, percentage: 28.2, description: 'Seasonal wiper replacements, prefer online purchase + pickup', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Price-Sensitive Promo Buyers', size: 67000, percentage: 16.0, description: 'Buy wipers only when on promotion or bundled', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 48000, percentage: 11.5, description: 'Service centers offering wiper replacement as add-on service', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Fleet Operators', size: 35000, percentage: 8.4, description: 'Fleet maintenance teams with bulk wiper programs', logic: 'rule-based' },
   ],
-  'Sports': [
-    { id: 'seg-1', name: 'Fitness Fanatics', size: 44500, percentage: 22.8, description: 'Regular gym-goers, buy performance gear', logic: 'statistical' },
-    { id: 'seg-2', name: 'Weekend Warriors', size: 62300, percentage: 31.9, description: 'Casual athletes, seasonal activity spikes', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Team Sports Parents', size: 38900, percentage: 19.9, description: 'Buy for kids sports activities', logic: 'statistical' },
-    { id: 'seg-4', name: 'Outdoor Adventurers', size: 29700, percentage: 15.2, description: 'Hiking, camping, outdoor activities', logic: 'rule-based' },
+  'Battery and Electrical': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 89000, percentage: 20.4, description: 'Proactive battery replacers based on age/mileage signals', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Urgent Repair Buyers', size: 105000, percentage: 24.1, description: 'Emergency battery failures needing same-day replacement', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 62000, percentage: 14.2, description: 'Repair shops with consistent battery & alternator orders', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Emergency Restock Buyers', size: 45000, percentage: 10.3, description: 'Shops needing emergency battery stock during cold snaps', logic: 'rule-based' },
   ],
-  // Sally Beauty Categories
-  'Hair Color': [
-    { id: 'seg-1', name: 'Color Enthusiasts', size: 45200, percentage: 24.5, description: 'Frequent color changers, try new shades', logic: 'statistical' },
-    { id: 'seg-2', name: 'Vivid Creators', size: 32100, percentage: 17.4, description: 'Bold fashion colors, creative expression', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Professional Stylists', size: 58900, percentage: 31.9, description: 'Licensed pros buying for clients', logic: 'statistical' },
-    { id: 'seg-4', name: 'First-Time Colorists', size: 28400, percentage: 15.4, description: 'New to at-home color, need guidance', logic: 'rule-based' },
+  'Cooling and Heating': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 76000, percentage: 19.8, description: 'Seasonal coolant flush and thermostat replacement buyers', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Urgent Repair Buyers', size: 58000, percentage: 15.1, description: 'Overheating-triggered buyers needing immediate cooling parts', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 54000, percentage: 14.1, description: 'Shops specializing in cooling system repairs', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Fleet Operators', size: 32000, percentage: 8.3, description: 'Fleet teams with scheduled coolant programs', logic: 'rule-based' },
   ],
-  'Hair Care': [
-    { id: 'seg-1', name: 'Bond Repair Seekers', size: 41300, percentage: 22.1, description: 'Damaged hair, seeking repair solutions', logic: 'statistical' },
-    { id: 'seg-2', name: 'Natural Hair Lovers', size: 52800, percentage: 28.3, description: 'Prefer natural/organic ingredients', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Routine Restockers', size: 61200, percentage: 32.8, description: 'Regular replenishment buyers', logic: 'statistical' },
-    { id: 'seg-4', name: 'Treatment Seekers', size: 31400, percentage: 16.8, description: 'Looking for specific hair treatments', logic: 'rule-based' },
+  'Ignition and Tune Up': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 68000, percentage: 21.5, description: 'Spark plug and ignition wire replacements on schedule', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Price-Sensitive Promo Buyers', size: 42000, percentage: 13.3, description: 'Buy tune-up kits when bundled or discounted', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 58000, percentage: 18.4, description: 'Tune-up specialists with consistent ignition parts orders', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Fleet Operators', size: 28000, percentage: 8.9, description: 'Fleet maintenance with bulk tune-up schedules', logic: 'rule-based' },
   ],
-  'Styling Tools': [
-    { id: 'seg-1', name: 'Pro Stylists', size: 38700, percentage: 21.2, description: 'Professional salon stylists', logic: 'statistical' },
-    { id: 'seg-2', name: 'Home Stylists', size: 56400, percentage: 30.9, description: 'DIY styling enthusiasts', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Tool Upgraders', size: 48200, percentage: 26.4, description: 'Replacing old tools with better ones', logic: 'statistical' },
-    { id: 'seg-4', name: 'First Tool Buyers', size: 39100, percentage: 21.4, description: 'New to styling tools', logic: 'rule-based' },
+  'Exhaust and Emissions': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 45000, percentage: 16.2, description: 'Planned exhaust component replacements for older vehicles', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Urgent Repair Buyers', size: 52000, percentage: 18.7, description: 'Failed emissions test or exhaust leak needing immediate fix', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 68000, percentage: 24.5, description: 'Muffler and exhaust specialist shops', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Emergency Restock Buyers', size: 32000, percentage: 11.5, description: 'Shops needing quick exhaust part restocks', logic: 'rule-based' },
   ],
-  'Nails': [
-    { id: 'seg-1', name: 'Nail Artists', size: 35600, percentage: 19.8, description: 'Creative nail art enthusiasts', logic: 'statistical' },
-    { id: 'seg-2', name: 'Gel Enthusiasts', size: 48900, percentage: 27.2, description: 'Prefer long-lasting gel polish', logic: 'rule-based' },
-    { id: 'seg-3', name: 'DIY Manicurists', size: 54200, percentage: 30.1, description: 'Regular at-home manicures', logic: 'statistical' },
-    { id: 'seg-4', name: 'Color Collectors', size: 41100, percentage: 22.9, description: 'Build polish collections', logic: 'rule-based' },
+  'Steering and Suspension': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 38000, percentage: 13.8, description: 'Planned strut and shock replacements on high-mileage vehicles', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Urgent Repair Buyers', size: 48000, percentage: 17.5, description: 'Steering noise or handling issues triggering immediate purchases', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 72000, percentage: 26.2, description: 'Alignment and suspension specialist shops', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Fleet Operators', size: 28000, percentage: 10.2, description: 'Fleet teams with suspension maintenance schedules', logic: 'rule-based' },
   ],
-  'Cosmetics & Lashes': [
-    { id: 'seg-1', name: 'Lash Lovers', size: 42800, percentage: 23.4, description: 'False lash enthusiasts', logic: 'statistical' },
-    { id: 'seg-2', name: 'Brow Perfectionists', size: 38500, percentage: 21.1, description: 'Focus on brow grooming', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Makeup Minimalists', size: 51200, percentage: 28.0, description: 'Simple, essential makeup routine', logic: 'statistical' },
-    { id: 'seg-4', name: 'Pro MUAs', size: 50300, percentage: 27.5, description: 'Professional makeup artists', logic: 'rule-based' },
-  ],
-  "Men's Grooming": [
-    { id: 'seg-1', name: 'Barber Pros', size: 31200, percentage: 18.9, description: 'Professional barbers', logic: 'statistical' },
-    { id: 'seg-2', name: 'Beard Enthusiasts', size: 45600, percentage: 27.6, description: 'Beard care focused', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Home Groomers', size: 52100, percentage: 31.5, description: 'DIY haircuts and grooming', logic: 'statistical' },
-    { id: 'seg-4', name: 'Classic Gentlemen', size: 36400, percentage: 22.0, description: 'Traditional grooming products', logic: 'rule-based' },
-  ],
-  'Textured Hair Care': [
-    { id: 'seg-1', name: 'Curl Definers', size: 39800, percentage: 22.4, description: 'Curly hair definition seekers', logic: 'statistical' },
-    { id: 'seg-2', name: 'Protective Stylists', size: 47200, percentage: 26.6, description: 'Protective styling enthusiasts', logic: 'rule-based' },
-    { id: 'seg-3', name: 'Moisture Seekers', size: 54600, percentage: 30.7, description: 'Focus on hydration and moisture', logic: 'statistical' },
-    { id: 'seg-4', name: 'Natural Hair Newbies', size: 36100, percentage: 20.3, description: 'New to natural hair journey', logic: 'rule-based' },
-  ],
-  // Michaels Categories - 2 segments mapping to product categories
-  'Christmas Trees': [
-    { id: 'mseg-1', name: 'Holiday Decorators', size: 68500, percentage: 38.2, description: 'Ornaments, toppers, and decor enthusiasts', logic: 'statistical' },
-    { id: 'mseg-2', name: 'Premium Tree Seekers', size: 58200, percentage: 32.4, description: 'Looking for high-end pre-lit Christmas trees', logic: 'rule-based' },
-  ],
-  'Christmas Decor Collections': [
-    { id: 'mseg-1', name: 'Holiday Decorators', size: 68500, percentage: 38.2, description: 'Ornaments, toppers, and decor enthusiasts', logic: 'statistical' },
-    { id: 'mseg-2', name: 'Premium Tree Seekers', size: 58200, percentage: 32.4, description: 'Looking for high-end pre-lit Christmas trees', logic: 'rule-based' },
-  ],
-  // TSC Categories - 2 segments for Home Decor and Christmas Decor
-  'Home Decor': [
-    { id: 'tseg-1', name: 'Farmhouse Enthusiasts', size: 45200, percentage: 35.8, description: 'Rustic farmhouse decor lovers seeking country-style home accents', logic: 'statistical' },
-    { id: 'tseg-2', name: 'Holiday Shoppers', size: 38900, percentage: 30.8, description: 'Seasonal buyers looking for festive decorations', logic: 'rule-based' },
-  ],
-  'Christmas Decor': [
-    { id: 'tseg-1', name: 'Farmhouse Enthusiasts', size: 45200, percentage: 35.8, description: 'Rustic farmhouse decor lovers seeking country-style home accents', logic: 'statistical' },
-    { id: 'tseg-2', name: 'Holiday Shoppers', size: 38900, percentage: 30.8, description: 'Seasonal buyers looking for festive outdoor and porch decorations', logic: 'rule-based' },
+  'Lighting': [
+    { id: 'seg-diy-1', name: 'DIY Routine Maintenance Buyers', size: 95000, percentage: 27.4, description: 'Bulb replacements and headlight upgrades, high online purchase rate', logic: 'statistical' },
+    { id: 'seg-diy-2', name: 'DIY Price-Sensitive Promo Buyers', size: 58000, percentage: 16.7, description: 'Buy lighting upgrades when discounted or in bundles', logic: 'rule-based' },
+    { id: 'seg-pro-1', name: 'PRO High-Value Shops', size: 42000, percentage: 12.1, description: 'Service centers offering lighting as add-on installation', logic: 'statistical' },
+    { id: 'seg-pro-2', name: 'PRO Fleet Operators', size: 32000, percentage: 9.2, description: 'Fleet compliance teams maintaining headlight/tail light standards', logic: 'rule-based' },
   ],
 }
 
-// Category-specific offers
+// Auto Parts Category Offers — Segment-Based + Category-Based Promo Rules
 const CATEGORY_OFFERS: Record<string, { segmentId: string; segmentName: string; productGroup: string; promotion: string; promoValue: string; expectedLift: number; marginImpact: number; overstockCoverage: number }[]> = {
-  'Apparel': [
-    { segmentId: 'seg-1', segmentName: 'Fashion Forward VIPs', productGroup: 'New Arrivals Premium', promotion: 'VIP First Look 20%', promoValue: '20% OFF', expectedLift: 92, marginImpact: -10, overstockCoverage: 0 },
-    { segmentId: 'seg-2', segmentName: 'Seasonal Shoppers', productGroup: 'End of Season Styles', promotion: 'Season Finale 40%', promoValue: '40% OFF', expectedLift: 78, marginImpact: -18, overstockCoverage: 85 },
-    { segmentId: 'seg-3', segmentName: 'Basics Loyalists', productGroup: 'Core Essentials', promotion: 'Stock Up & Save', promoValue: 'Buy 3 Get 1', expectedLift: 65, marginImpact: -8, overstockCoverage: 42 },
-    { segmentId: 'seg-4', segmentName: 'Trend Explorers', productGroup: 'Trending Now', promotion: 'Try Something New', promoValue: '15% OFF First', expectedLift: 71, marginImpact: -6, overstockCoverage: 28 },
+  'Oil and Lubricants': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Synthetic Oil + Filter Kits', promotion: '15% Off Oil Change Kit', promoValue: '15% OFF + Bundle', expectedLift: 82, marginImpact: -5, overstockCoverage: 35 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Price-Sensitive Promo Buyers', productGroup: 'Conventional Oil Bundles', promotion: 'Oil Bundle Deal', promoValue: 'Buy 2 Get Free Filter', expectedLift: 78, marginImpact: -8, overstockCoverage: 55 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Synthetic Oil Cases', promotion: 'PRO Volume Discount', promoValue: '20% OFF 10+ Cases', expectedLift: 91, marginImpact: -12, overstockCoverage: 42 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', productGroup: 'Fleet Oil Program SKUs', promotion: 'Fleet Contract Pricing', promoValue: '25% OFF Contract', expectedLift: 88, marginImpact: -15, overstockCoverage: 60 },
   ],
-  'Electronics': [
-    { segmentId: 'seg-1', segmentName: 'Tech Enthusiasts', productGroup: 'Latest Gadgets', promotion: 'Early Adopter Bonus', promoValue: '$50 OFF + Gift', expectedLift: 88, marginImpact: -12, overstockCoverage: 0 },
-    { segmentId: 'seg-2', segmentName: 'Practical Upgraders', productGroup: 'Certified Refurbished', promotion: 'Smart Upgrade Deal', promoValue: '25% OFF', expectedLift: 74, marginImpact: -14, overstockCoverage: 72 },
-    { segmentId: 'seg-3', segmentName: 'Accessory Collectors', productGroup: 'Cases & Chargers', promotion: 'Bundle & Save', promoValue: 'Buy 2 Get 30%', expectedLift: 82, marginImpact: -9, overstockCoverage: 56 },
-    { segmentId: 'seg-4', segmentName: 'Deal Hunters', productGroup: 'Last Gen Models', promotion: 'Clearance Blowout', promoValue: 'Up to 50% OFF', expectedLift: 91, marginImpact: -22, overstockCoverage: 94 },
+  'Braking': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Brake Pad + Rotor Kits', promotion: '15% Off Brake Kit', promoValue: '15% OFF Kit', expectedLift: 79, marginImpact: -6, overstockCoverage: 45 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', productGroup: 'Premium Brake Pads', promotion: 'Urgent Repair Deal', promoValue: '20% OFF + Free Fluid', expectedLift: 85, marginImpact: -10, overstockCoverage: 30 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Brake Components', promotion: 'PRO Brake Volume Deal', promoValue: '25% OFF 20+ Units', expectedLift: 92, marginImpact: -14, overstockCoverage: 55 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Emergency Restock Buyers', productGroup: 'Fast-Ship Brake SKUs', promotion: 'Emergency Restock Pricing', promoValue: '10% OFF Same-Day', expectedLift: 88, marginImpact: -5, overstockCoverage: 20 },
   ],
-  'Home & Garden': [
-    { segmentId: 'seg-1', segmentName: 'Home Renovators', productGroup: 'Furniture Collections', promotion: 'Room Makeover 20%', promoValue: '20% OFF $500+', expectedLift: 76, marginImpact: -11, overstockCoverage: 38 },
-    { segmentId: 'seg-2', segmentName: 'Seasonal Decorators', productGroup: 'Seasonal Decor', promotion: 'Refresh Your Space', promoValue: '30% OFF Decor', expectedLift: 84, marginImpact: -15, overstockCoverage: 78 },
-    { segmentId: 'seg-3', segmentName: 'Garden Enthusiasts', productGroup: 'Plants & Planters', promotion: 'Spring Garden Sale', promoValue: 'Buy 2 Get 1 Free', expectedLift: 79, marginImpact: -12, overstockCoverage: 45 },
-    { segmentId: 'seg-4', segmentName: 'Smart Home Adopters', productGroup: 'Smart Devices', promotion: 'Connected Home Bundle', promoValue: '$75 OFF Bundle', expectedLift: 68, marginImpact: -8, overstockCoverage: 22 },
+  'Filters and PCV': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Oil + Air Filter Combo Kits', promotion: '15% Off Filter Kit', promoValue: '15% OFF + Bundle', expectedLift: 80, marginImpact: -5, overstockCoverage: 40 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY First-Time Fixers', productGroup: 'Starter Filter Packs', promotion: 'First-Timer Filter Deal', promoValue: '10% OFF + Guide', expectedLift: 72, marginImpact: -4, overstockCoverage: 25 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Air & Oil Filters', promotion: 'PRO Filter Volume Deal', promoValue: '20% OFF 50+ Units', expectedLift: 90, marginImpact: -11, overstockCoverage: 50 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', productGroup: 'Fleet Filter Program SKUs', promotion: 'Fleet Filter Contract', promoValue: '25% OFF Contract', expectedLift: 87, marginImpact: -14, overstockCoverage: 58 },
   ],
-  'Beauty': [
-    { segmentId: 'seg-1', segmentName: 'Beauty Insiders', productGroup: 'New Launches', promotion: 'Insider Early Access', promoValue: 'Free Gift + 15%', expectedLift: 94, marginImpact: -13, overstockCoverage: 0 },
-    { segmentId: 'seg-2', segmentName: 'Skincare Devotees', productGroup: 'Skincare Essentials', promotion: 'Routine Restock', promoValue: '25% OFF Skincare', expectedLift: 81, marginImpact: -10, overstockCoverage: 35 },
-    { segmentId: 'seg-3', segmentName: 'Makeup Enthusiasts', productGroup: 'Color Cosmetics', promotion: 'Palette Perfection', promoValue: 'Buy 2 Get 1', expectedLift: 77, marginImpact: -14, overstockCoverage: 52 },
-    { segmentId: 'seg-4', segmentName: 'Clean Beauty Seekers', productGroup: 'Natural & Organic', promotion: 'Clean Beauty Week', promoValue: '20% OFF Clean', expectedLift: 72, marginImpact: -9, overstockCoverage: 28 },
+  'Wipers and Related': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Wiper Blade Pairs', promotion: 'Seasonal Wiper Deal', promoValue: '15% OFF Pair', expectedLift: 76, marginImpact: -5, overstockCoverage: 65 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Price-Sensitive Promo Buyers', productGroup: 'Value Wiper Bundles', promotion: 'Wiper + Washer Bundle', promoValue: 'Bundle: Wipers + Fluid', expectedLift: 74, marginImpact: -7, overstockCoverage: 72 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Wiper Inventory', promotion: 'PRO Wiper Stock Deal', promoValue: '20% OFF 30+ Pairs', expectedLift: 84, marginImpact: -10, overstockCoverage: 60 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', productGroup: 'Fleet Wiper Program', promotion: 'Fleet Wiper Contract', promoValue: '25% OFF Seasonal', expectedLift: 81, marginImpact: -12, overstockCoverage: 68 },
   ],
-  'Sports': [
-    { segmentId: 'seg-1', segmentName: 'Fitness Fanatics', productGroup: 'Performance Gear', promotion: 'Pro Performance 20%', promoValue: '20% OFF Gear', expectedLift: 86, marginImpact: -11, overstockCoverage: 32 },
-    { segmentId: 'seg-2', segmentName: 'Weekend Warriors', productGroup: 'Casual Activewear', promotion: 'Weekend Ready Sale', promoValue: 'Buy 2 Save 25%', expectedLift: 73, marginImpact: -12, overstockCoverage: 48 },
-    { segmentId: 'seg-3', segmentName: 'Team Sports Parents', productGroup: 'Youth Equipment', promotion: 'Back to Sports', promoValue: '30% OFF Youth', expectedLift: 89, marginImpact: -16, overstockCoverage: 65 },
-    { segmentId: 'seg-4', segmentName: 'Outdoor Adventurers', productGroup: 'Outdoor Essentials', promotion: 'Adventure Awaits', promoValue: '$40 OFF $150+', expectedLift: 71, marginImpact: -10, overstockCoverage: 38 },
+  'Battery and Electrical': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Replacement Batteries', promotion: 'Battery Swap Deal', promoValue: '15% OFF + Free Test', expectedLift: 83, marginImpact: -6, overstockCoverage: 30 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', productGroup: 'Emergency Battery SKUs', promotion: 'Emergency Battery Deal', promoValue: '10% OFF Same-Day', expectedLift: 89, marginImpact: -4, overstockCoverage: 15 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Batteries + Alternators', promotion: 'PRO Electrical Volume', promoValue: '20% OFF 10+ Units', expectedLift: 91, marginImpact: -13, overstockCoverage: 45 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Emergency Restock Buyers', productGroup: 'Fast-Ship Battery SKUs', promotion: 'Emergency Restock', promoValue: '10% OFF Rush Order', expectedLift: 86, marginImpact: -5, overstockCoverage: 20 },
   ],
-  // Sally Beauty - Using standardized categories from sally_products.json
-  'Hair Color': [
-    { segmentId: 'seg-1', segmentName: 'Color Enthusiasts', productGroup: 'Hair Color', promotion: 'Color Refresh 20%', promoValue: '20% OFF Color', expectedLift: 88, marginImpact: -12, overstockCoverage: 25 },
-    { segmentId: 'seg-2', segmentName: 'Vivid Creators', productGroup: 'Hair Color', promotion: 'Vivid Color Bundle', promoValue: 'Buy 2 Get 1', expectedLift: 82, marginImpact: -15, overstockCoverage: 40 },
-    { segmentId: 'seg-3', segmentName: 'Professional Stylists', productGroup: 'Hair Color', promotion: 'Pro Color Deal', promoValue: '25% OFF $75+', expectedLift: 91, marginImpact: -10, overstockCoverage: 35 },
-    { segmentId: 'seg-4', segmentName: 'First-Time Colorists', productGroup: 'Hair Color', promotion: 'Starter Kit Special', promoValue: '15% OFF First', expectedLift: 75, marginImpact: -8, overstockCoverage: 20 },
+  'Cooling and Heating': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Coolant + Thermostat Kits', promotion: 'Seasonal Coolant Deal', promoValue: '15% OFF Kit', expectedLift: 77, marginImpact: -5, overstockCoverage: 45 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', productGroup: 'Radiator + Hose SKUs', promotion: 'Overheat Repair Deal', promoValue: '20% OFF + Free Coolant', expectedLift: 84, marginImpact: -9, overstockCoverage: 30 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Cooling Components', promotion: 'PRO Cooling Volume', promoValue: '25% OFF 20+ Units', expectedLift: 88, marginImpact: -14, overstockCoverage: 50 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', productGroup: 'Fleet Cooling Program', promotion: 'Fleet Coolant Contract', promoValue: '20% OFF Contract', expectedLift: 85, marginImpact: -12, overstockCoverage: 55 },
   ],
-  'Hair Care': [
-    { segmentId: 'seg-1', segmentName: 'Bond Repair Seekers', productGroup: 'Hair Care', promotion: 'Olaplex Exclusive', promoValue: '20% OFF Olaplex', expectedLift: 94, marginImpact: -11, overstockCoverage: 15 },
-    { segmentId: 'seg-2', segmentName: 'Natural Hair Lovers', productGroup: 'Hair Care', promotion: 'Mielle Magic', promoValue: 'Buy 2 Save 25%', expectedLift: 85, marginImpact: -13, overstockCoverage: 30 },
-    { segmentId: 'seg-3', segmentName: 'Routine Restockers', productGroup: 'Hair Care', promotion: 'Restock & Save', promoValue: '15% OFF Shampoo', expectedLift: 78, marginImpact: -9, overstockCoverage: 45 },
-    { segmentId: 'seg-4', segmentName: 'Treatment Seekers', productGroup: 'Hair Care', promotion: 'Treatment Tuesday', promoValue: '$10 OFF $50+', expectedLift: 72, marginImpact: -7, overstockCoverage: 25 },
+  'Ignition and Tune Up': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Spark Plug + Wire Kits', promotion: 'Tune-Up Kit Deal', promoValue: '15% OFF Kit', expectedLift: 78, marginImpact: -5, overstockCoverage: 38 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Price-Sensitive Promo Buyers', productGroup: 'Value Tune-Up Bundles', promotion: 'Tune-Up Bundle Save', promoValue: 'Bundle: Plugs + Wires + Coil', expectedLift: 75, marginImpact: -8, overstockCoverage: 48 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Ignition Components', promotion: 'PRO Ignition Volume', promoValue: '20% OFF 30+ Units', expectedLift: 87, marginImpact: -11, overstockCoverage: 42 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', productGroup: 'Fleet Tune-Up Program', promotion: 'Fleet Tune-Up Contract', promoValue: '25% OFF Contract', expectedLift: 84, marginImpact: -13, overstockCoverage: 52 },
   ],
-  'Styling Tools': [
-    { segmentId: 'seg-1', segmentName: 'Pro Stylists', productGroup: 'Styling Tools', promotion: 'Pro Tools 20%', promoValue: '20% OFF Tools', expectedLift: 89, marginImpact: -14, overstockCoverage: 20 },
-    { segmentId: 'seg-2', segmentName: 'Home Stylists', productGroup: 'Styling Tools', promotion: 'Style at Home', promoValue: '$25 OFF $100+', expectedLift: 81, marginImpact: -12, overstockCoverage: 35 },
-    { segmentId: 'seg-3', segmentName: 'Tool Upgraders', productGroup: 'Styling Tools', promotion: 'Upgrade Deal', promoValue: '30% OFF Select', expectedLift: 86, marginImpact: -16, overstockCoverage: 50 },
-    { segmentId: 'seg-4', segmentName: 'First Tool Buyers', productGroup: 'Styling Tools', promotion: 'Starter Special', promoValue: '15% OFF First', expectedLift: 74, marginImpact: -8, overstockCoverage: 15 },
+  'Exhaust and Emissions': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Muffler + Pipe Kits', promotion: 'Exhaust Kit Deal', promoValue: '15% OFF Kit', expectedLift: 72, marginImpact: -6, overstockCoverage: 40 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', productGroup: 'Emergency Exhaust Parts', promotion: 'Emissions Fix Deal', promoValue: '20% OFF + Free Gasket', expectedLift: 81, marginImpact: -9, overstockCoverage: 25 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Exhaust Components', promotion: 'PRO Exhaust Volume', promoValue: '25% OFF 15+ Units', expectedLift: 89, marginImpact: -14, overstockCoverage: 55 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Emergency Restock Buyers', productGroup: 'Fast-Ship Exhaust SKUs', promotion: 'Emergency Exhaust Restock', promoValue: '10% OFF Same-Day', expectedLift: 85, marginImpact: -5, overstockCoverage: 20 },
   ],
-  'Nails': [
-    { segmentId: 'seg-1', segmentName: 'Nail Artists', productGroup: 'Nails', promotion: 'Pro Nail Deal', promoValue: '25% OFF Pro', expectedLift: 87, marginImpact: -13, overstockCoverage: 30 },
-    { segmentId: 'seg-2', segmentName: 'Gel Enthusiasts', productGroup: 'Nails', promotion: 'Gel Polish Bundle', promoValue: 'Buy 3 Get 1', expectedLift: 83, marginImpact: -11, overstockCoverage: 40 },
-    { segmentId: 'seg-3', segmentName: 'DIY Manicurists', productGroup: 'Nails', promotion: 'DIY Nail Kit', promoValue: '20% OFF Kits', expectedLift: 79, marginImpact: -10, overstockCoverage: 35 },
-    { segmentId: 'seg-4', segmentName: 'Color Collectors', productGroup: 'Nails', promotion: 'Color Craze', promoValue: 'Buy 2 Save 30%', expectedLift: 76, marginImpact: -9, overstockCoverage: 45 },
+  'Steering and Suspension': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Strut + Shock Kits', promotion: 'Suspension Kit Deal', promoValue: '15% OFF Kit', expectedLift: 74, marginImpact: -7, overstockCoverage: 35 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', productGroup: 'Tie Rod + Ball Joint SKUs', promotion: 'Steering Fix Deal', promoValue: '20% OFF + Free Alignment Check', expectedLift: 82, marginImpact: -10, overstockCoverage: 28 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Suspension Components', promotion: 'PRO Suspension Volume', promoValue: '25% OFF 20+ Units', expectedLift: 90, marginImpact: -15, overstockCoverage: 48 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', productGroup: 'Fleet Suspension Program', promotion: 'Fleet Suspension Contract', promoValue: '20% OFF Contract', expectedLift: 86, marginImpact: -13, overstockCoverage: 52 },
   ],
-  'Cosmetics & Lashes': [
-    { segmentId: 'seg-1', segmentName: 'Lash Lovers', productGroup: 'Cosmetics & Lashes', promotion: 'Lash Bundle', promoValue: 'Buy 2 Get 1', expectedLift: 91, marginImpact: -12, overstockCoverage: 25 },
-    { segmentId: 'seg-2', segmentName: 'Brow Perfectionists', productGroup: 'Cosmetics & Lashes', promotion: 'Brow Bar Deal', promoValue: '20% OFF Brows', expectedLift: 84, marginImpact: -10, overstockCoverage: 30 },
-    { segmentId: 'seg-3', segmentName: 'Makeup Minimalists', productGroup: 'Cosmetics & Lashes', promotion: 'Essentials Sale', promoValue: '15% OFF Basics', expectedLift: 77, marginImpact: -8, overstockCoverage: 40 },
-    { segmentId: 'seg-4', segmentName: 'Pro MUAs', productGroup: 'Cosmetics & Lashes', promotion: 'Pro MUA Special', promoValue: '$15 OFF $75+', expectedLift: 88, marginImpact: -11, overstockCoverage: 20 },
-  ],
-  "Men's Grooming": [
-    { segmentId: 'seg-1', segmentName: 'Barber Pros', productGroup: "Men's Grooming", promotion: 'Barber Bundle', promoValue: '25% OFF Clippers', expectedLift: 92, marginImpact: -14, overstockCoverage: 20 },
-    { segmentId: 'seg-2', segmentName: 'Beard Enthusiasts', productGroup: "Men's Grooming", promotion: 'Beard Care Deal', promoValue: 'Buy 2 Get 1', expectedLift: 85, marginImpact: -11, overstockCoverage: 35 },
-    { segmentId: 'seg-3', segmentName: 'Home Groomers', productGroup: "Men's Grooming", promotion: 'Home Grooming Kit', promoValue: '20% OFF Kits', expectedLift: 79, marginImpact: -10, overstockCoverage: 40 },
-    { segmentId: 'seg-4', segmentName: 'Classic Gentlemen', productGroup: "Men's Grooming", promotion: 'Classic Care', promoValue: '15% OFF Aftershave', expectedLift: 73, marginImpact: -8, overstockCoverage: 30 },
-  ],
-  'Textured Hair Care': [
-    { segmentId: 'seg-1', segmentName: 'Curl Definers', productGroup: 'Textured Hair Care', promotion: 'Curl Definition', promoValue: '20% OFF Curls', expectedLift: 90, marginImpact: -12, overstockCoverage: 25 },
-    { segmentId: 'seg-2', segmentName: 'Protective Stylists', productGroup: 'Textured Hair Care', promotion: 'Protective Style Bundle', promoValue: 'Buy 2 Get 1', expectedLift: 86, marginImpact: -13, overstockCoverage: 35 },
-    { segmentId: 'seg-3', segmentName: 'Moisture Seekers', productGroup: 'Textured Hair Care', promotion: 'Hydration Station', promoValue: '25% OFF Moisture', expectedLift: 82, marginImpact: -10, overstockCoverage: 40 },
-    { segmentId: 'seg-4', segmentName: 'Natural Hair Newbies', productGroup: 'Textured Hair Care', promotion: 'Starter Kit', promoValue: '15% OFF First', expectedLift: 75, marginImpact: -8, overstockCoverage: 20 },
-  ],
-  // Michaels Categories - 2 segments
-  'Christmas Trees': [
-    { segmentId: 'mseg-1', segmentName: 'Holiday Decorators', productGroup: 'Christmas Decor Collections', promotion: 'Holiday Decor Sale', promoValue: '60% OFF Decor', expectedLift: 92, marginImpact: -22, overstockCoverage: 88 },
-    { segmentId: 'mseg-2', segmentName: 'Premium Tree Seekers', productGroup: 'Christmas Trees', promotion: 'Premium Tree Sale', promoValue: '60% OFF Trees', expectedLift: 95, marginImpact: -25, overstockCoverage: 85 },
-  ],
-  'Christmas Decor Collections': [
-    { segmentId: 'mseg-1', segmentName: 'Holiday Decorators', productGroup: 'Christmas Decor Collections', promotion: 'Holiday Decor Sale', promoValue: '60% OFF Decor', expectedLift: 92, marginImpact: -22, overstockCoverage: 88 },
-    { segmentId: 'mseg-2', segmentName: 'Premium Tree Seekers', productGroup: 'Christmas Trees', promotion: 'Premium Tree Sale', promoValue: '60% OFF Trees', expectedLift: 95, marginImpact: -25, overstockCoverage: 85 },
-  ],
-  // TSC Categories - 2 segments
-  'Home Decor': [
-    { segmentId: 'tseg-1', segmentName: 'Farmhouse Enthusiasts', productGroup: 'Home Decor', promotion: 'Farmhouse Favorites Sale', promoValue: '60% OFF Home', expectedLift: 88, marginImpact: -20, overstockCoverage: 82 },
-    { segmentId: 'tseg-2', segmentName: 'Holiday Shoppers', productGroup: 'Christmas Decor', promotion: 'Holiday Home Sale', promoValue: '60% OFF Decor', expectedLift: 91, marginImpact: -22, overstockCoverage: 85 },
-  ],
-  'Christmas Decor': [
-    { segmentId: 'tseg-1', segmentName: 'Farmhouse Enthusiasts', productGroup: 'Home Decor', promotion: 'Farmhouse Favorites Sale', promoValue: '60% OFF Home', expectedLift: 88, marginImpact: -20, overstockCoverage: 82 },
-    { segmentId: 'tseg-2', segmentName: 'Holiday Shoppers', productGroup: 'Christmas Decor', promotion: 'Holiday Outdoor Sale', promoValue: '60% OFF Decor', expectedLift: 93, marginImpact: -24, overstockCoverage: 90 },
+  'Lighting': [
+    { segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Headlight + Bulb Kits', promotion: 'Lighting Upgrade Deal', promoValue: '15% OFF Kit', expectedLift: 79, marginImpact: -5, overstockCoverage: 42 },
+    { segmentId: 'seg-diy-2', segmentName: 'DIY Price-Sensitive Promo Buyers', productGroup: 'Value Bulb Bundles', promotion: 'Bulb Bundle Save', promoValue: 'Buy 2 Get 1 Free', expectedLift: 76, marginImpact: -8, overstockCoverage: 55 },
+    { segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', productGroup: 'Bulk Lighting Inventory', promotion: 'PRO Lighting Volume', promoValue: '20% OFF 30+ Units', expectedLift: 85, marginImpact: -10, overstockCoverage: 48 },
+    { segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', productGroup: 'Fleet Lighting Program', promotion: 'Fleet Lighting Contract', promoValue: '25% OFF Contract', expectedLift: 82, marginImpact: -12, overstockCoverage: 58 },
   ],
 }
 
-// Category-specific creatives with diverse images
+// Auto Parts Creative Templates — Product-focused, functional use cases
 const CATEGORY_CREATIVES: Record<string, { id: string; segmentId: string; segmentName: string; headline: string; subcopy: string; cta: string; tone: string; hasOffer: boolean; offerBadge: string; complianceStatus: string; reasoning: string; image: string; approved: boolean }[]> = {
-  'Apparel': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Fashion Forward VIPs', headline: 'VIP First Look: New Arrivals', subcopy: 'BaBylissPRO styling tools for the pros', cta: 'Shop New In', tone: 'Exclusive', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Exclusivity drives VIP engagement and early adoption', image: '/images/styling_tools/SBS-021477.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Seasonal Shoppers', headline: 'Season Finale: Up to 40% OFF', subcopy: 'Stock up on Olaplex bond repair', cta: 'Shop the Sale', tone: 'Urgent', hasOffer: true, offerBadge: '40% OFF', complianceStatus: 'approved', reasoning: 'Urgency messaging aligns with seasonal shopping behavior', image: '/images/hair_care/SBS-009616.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Basics Loyalists', headline: 'Stock Up on Essentials', subcopy: 'Wella Color Charm for perfect tones', cta: 'Build Your Routine', tone: 'Practical', hasOffer: true, offerBadge: 'Buy 3 Get 1', complianceStatus: 'approved', reasoning: 'Value-focused messaging for repeat essentials buyers', image: '/images/hair_color/WELLA17.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Trend Explorers', headline: 'Trending Now: Bold Colors Await', subcopy: 'Manic Panic vivid colors for the bold', cta: 'Explore Trends', tone: 'Inspiring', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'pending', reasoning: 'Discovery-focused for browsers who need a push', image: '/images/hair_color/MANIC2.jpg', approved: false },
+  'Oil and Lubricants': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Save on Your Next Oil Change', subcopy: 'Full synthetic oil + filter kit — everything you need for a complete oil change at home', cta: 'Find Parts for Your Vehicle', tone: 'Practical', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'DIY maintenance savings messaging drives routine buyers', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Price-Sensitive Promo Buyers', headline: 'Fix It Yourself & Save', subcopy: 'Conventional oil bundles at the best price — buy 2 jugs, get a free filter', cta: 'Order for Pickup Today', tone: 'Value', hasOffer: true, offerBadge: 'Free Filter', complianceStatus: 'approved', reasoning: 'Bundle value messaging for price-sensitive DIY buyers', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'Stock Up for Peak Demand', subcopy: 'Bulk synthetic oil cases with PRO volume pricing — 20% off 10+ cases', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '20% OFF Bulk', complianceStatus: 'approved', reasoning: 'Volume discount drives PRO shop restock behavior', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', headline: 'Fast Turnaround Parts', subcopy: 'Fleet oil program with scheduled deliveries and contract pricing', cta: 'Bulk Order Now', tone: 'Efficient', hasOffer: true, offerBadge: '25% OFF Contract', complianceStatus: 'pending', reasoning: 'Fleet efficiency messaging with contract pricing appeal', image: '/images/placeholder-product.svg', approved: false },
   ],
-  'Electronics': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Tech Enthusiasts', headline: 'Pro Tools for Pros', subcopy: 'Hot Tools 24K gold curling iron', cta: 'Get It First', tone: 'Exciting', hasOffer: true, offerBadge: '$50 OFF + Gift', complianceStatus: 'approved', reasoning: 'Early access appeals to tech-forward customers', image: '/images/styling_tools/SBS-345825.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Practical Upgraders', headline: 'Smart Upgrade, Smart Savings', subcopy: 'Ion Magnesium flat iron technology', cta: 'Upgrade Now', tone: 'Trustworthy', hasOffer: true, offerBadge: '25% OFF', complianceStatus: 'approved', reasoning: 'Value and reliability messaging for practical buyers', image: '/images/styling_tools/ION105.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Accessory Collectors', headline: 'Complete Your Setup', subcopy: 'Revlon one-step volumizer brush', cta: 'Build Your Bundle', tone: 'Helpful', hasOffer: true, offerBadge: 'Buy 2 Get 30%', complianceStatus: 'approved', reasoning: 'Cross-sell opportunity for accessory enthusiasts', image: '/images/styling_tools/SBS-170402.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Deal Hunters', headline: 'Clearance Alert: Up to 50% OFF', subcopy: 'Andis T-Outliner trimmer deals', cta: 'Grab the Deal', tone: 'Urgent', hasOffer: true, offerBadge: 'Up to 50% OFF', complianceStatus: 'pending', reasoning: 'Deep discount messaging for price-sensitive segment', image: '/images/mens_grooming/SBS-395010.jpg', approved: false },
+  'Braking': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Brake Confidence Starts Here', subcopy: 'Complete brake pad + rotor kit — fitment validated for your vehicle', cta: 'Find Parts for Your Vehicle', tone: 'Trustworthy', hasOffer: true, offerBadge: '15% OFF Kit', complianceStatus: 'approved', reasoning: 'Safety and confidence messaging for DIY brake jobs', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', headline: 'Brake Issue? Fix It Today', subcopy: 'Premium brake pads + free brake fluid — same-day pickup available', cta: 'Order for Pickup Today', tone: 'Urgent', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Urgency messaging for failure-triggered brake repairs', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'PRO Brake Parts at Volume Pricing', subcopy: 'Bulk brake components for high-volume shops — 25% off 20+ units', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '25% OFF Bulk', complianceStatus: 'approved', reasoning: 'Volume pricing drives PRO brake shop restocking', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Emergency Restock Buyers', headline: 'Emergency Brake Parts — Fast Ship', subcopy: 'Same-day delivery on fast-moving brake SKUs for urgent shop needs', cta: 'Order for Pickup Today', tone: 'Urgent', hasOffer: true, offerBadge: '10% OFF Rush', complianceStatus: 'pending', reasoning: 'Speed and availability messaging for emergency PRO restock', image: '/images/placeholder-product.svg', approved: false },
   ],
-  'Home & Garden': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Home Renovators', headline: 'Transform Your Look', subcopy: 'Mielle rosemary mint for healthy hair', cta: 'Start Your Project', tone: 'Inspiring', hasOffer: true, offerBadge: '20% OFF $500+', complianceStatus: 'approved', reasoning: 'Project-focused messaging for high-intent renovators', image: '/images/hair_care/SBS-762003.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Seasonal Decorators', headline: 'Refresh for the Season', subcopy: 'Cantu shea butter leave-in cream', cta: 'Shop Seasonal', tone: 'Fresh', hasOffer: true, offerBadge: '30% OFF Decor', complianceStatus: 'approved', reasoning: 'Seasonal refresh aligns with decorating habits', image: '/images/textured_hair_care/SBS-459068.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Garden Enthusiasts', headline: 'Grow Your Beauty Routine', subcopy: 'The Doux mousse for perfect curls', cta: 'Shop Garden', tone: 'Nurturing', hasOffer: true, offerBadge: 'Buy 2 Get 1', complianceStatus: 'approved', reasoning: 'Passion-driven messaging for garden lovers', image: '/images/textured_hair_care/SBS-801153.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Smart Home Adopters', headline: 'Smart Styling Solutions', subcopy: 'Camille Rose twisting butter', cta: 'Explore Smart Home', tone: 'Modern', hasOffer: true, offerBadge: '$75 OFF Bundle', complianceStatus: 'pending', reasoning: 'Tech-forward messaging for smart home interest', image: '/images/textured_hair_care/SBS-310320.jpg', approved: false },
+  'Filters and PCV': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Fresh Filters, Fresh Start', subcopy: 'Oil + air filter combo kits — easy installation, fitment guaranteed', cta: 'Find Parts for Your Vehicle', tone: 'Practical', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Routine maintenance convenience for DIY filter buyers', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY First-Time Fixers', headline: 'Your First Filter Change Made Easy', subcopy: 'Starter filter packs with step-by-step guide — perfect for beginners', cta: 'Find Parts for Your Vehicle', tone: 'Encouraging', hasOffer: true, offerBadge: '10% OFF', complianceStatus: 'approved', reasoning: 'Beginner-friendly messaging reduces first-timer hesitation', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'Bulk Filters for Every Fitment', subcopy: 'Air and oil filters in bulk — 20% off 50+ units for PRO shops', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '20% OFF Bulk', complianceStatus: 'approved', reasoning: 'Multi-fitment bulk supply for high-volume shops', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', headline: 'Fleet Filter Program — Contract Pricing', subcopy: 'Standardized filter program with scheduled deliveries for fleets', cta: 'Bulk Order Now', tone: 'Efficient', hasOffer: true, offerBadge: '25% OFF Contract', complianceStatus: 'pending', reasoning: 'Fleet standardization and contract pricing appeal', image: '/images/placeholder-product.svg', approved: false },
   ],
-  'Beauty': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Beauty Insiders', headline: 'Insider Access: New Launches', subcopy: 'Ardell Wispies for natural drama', cta: 'Get Early Access', tone: 'Exclusive', hasOffer: true, offerBadge: 'Free Gift + 15%', complianceStatus: 'approved', reasoning: 'Exclusivity and newness drive insider engagement', image: '/images/cosmetics_lashes/SBS-001686.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Skincare Devotees', headline: 'Restock Your Routine', subcopy: 'Palladio rice powder for flawless finish', cta: 'Shop Skincare', tone: 'Caring', hasOffer: true, offerBadge: '25% OFF', complianceStatus: 'approved', reasoning: 'Routine-focused for consistent skincare buyers', image: '/images/cosmetics_lashes/PLADIO7.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Makeup Enthusiasts', headline: 'Color Your World', subcopy: 'OPI nail lacquer in Big Apple Red', cta: 'Explore Colors', tone: 'Playful', hasOffer: true, offerBadge: 'Buy 2 Get 1', complianceStatus: 'approved', reasoning: 'Creative messaging for makeup collectors', image: '/images/nails/SBS-011313.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Clean Beauty Seekers', headline: 'Pure Beauty, Pure Savings', subcopy: 'RefectoCil professional brow dye', cta: 'Shop Clean Beauty', tone: 'Authentic', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'pending', reasoning: 'Values-aligned messaging for conscious consumers', image: '/images/cosmetics_lashes/IBN.jpg', approved: false },
+  'Wipers and Related': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Clear Vision, Safe Driving', subcopy: 'Wiper blade pairs — seasonal replacement, fitment validated', cta: 'Find Parts for Your Vehicle', tone: 'Safety', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Safety-focused seasonal replacement messaging', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Price-Sensitive Promo Buyers', headline: 'Wiper + Washer Bundle Deal', subcopy: 'Complete visibility bundle — wipers + washer fluid at one low price', cta: 'Order for Pickup Today', tone: 'Value', hasOffer: true, offerBadge: 'Bundle Deal', complianceStatus: 'approved', reasoning: 'Bundle value for price-sensitive seasonal buyers', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'Stock Wipers for Every Vehicle', subcopy: 'Bulk wiper inventory — 20% off 30+ pairs for service centers', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '20% OFF Bulk', complianceStatus: 'approved', reasoning: 'Service center add-on inventory stocking', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', headline: 'Fleet Wiper Program — Seasonal', subcopy: 'Seasonal wiper replacement program with contract pricing', cta: 'Bulk Order Now', tone: 'Efficient', hasOffer: true, offerBadge: '25% OFF Seasonal', complianceStatus: 'pending', reasoning: 'Fleet seasonal compliance and bulk savings', image: '/images/placeholder-product.svg', approved: false },
   ],
-  'Sports': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Fitness Fanatics', headline: 'Gear Up for Greatness', subcopy: 'Wahl Magic Clip cordless clipper', cta: 'Shop Performance', tone: 'Motivating', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Performance-focused for dedicated athletes', image: '/images/mens_grooming/SBS-785007.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Weekend Warriors', headline: 'Weekend Ready, Wallet Happy', subcopy: 'Clubman Pinaud aftershave lotion', cta: 'Shop Activewear', tone: 'Friendly', hasOffer: true, offerBadge: 'Buy 2 Save 25%', complianceStatus: 'approved', reasoning: 'Value and comfort for casual athletes', image: '/images/mens_grooming/SBS-625016.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Team Sports Parents', headline: 'Back to Grooming Season', subcopy: 'Gibs grooming beard oil', cta: 'Shop Youth Gear', tone: 'Supportive', hasOffer: true, offerBadge: '30% OFF Youth', complianceStatus: 'approved', reasoning: 'Family-focused for sports parents', image: '/images/mens_grooming/SBS-003300.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Outdoor Adventurers', headline: 'Adventure Awaits', subcopy: 'Seche Vite fast dry top coat', cta: 'Gear Up', tone: 'Adventurous', hasOffer: true, offerBadge: '$40 OFF $150+', complianceStatus: 'pending', reasoning: 'Adventure-driven for outdoor enthusiasts', image: '/images/nails/SBS-215000.jpg', approved: false },
+  'Battery and Electrical': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Prepare Your Car for Winter', subcopy: 'Replacement batteries with free testing — don\'t get stranded', cta: 'Find Parts for Your Vehicle', tone: 'Preventive', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Preventive battery replacement before winter messaging', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', headline: 'Dead Battery? Get Moving Fast', subcopy: 'Same-day pickup on replacement batteries — emergency pricing available', cta: 'Order for Pickup Today', tone: 'Urgent', hasOffer: true, offerBadge: '10% OFF', complianceStatus: 'approved', reasoning: 'Emergency urgency for dead battery situations', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'Bulk Batteries + Alternators', subcopy: 'PRO electrical volume pricing — 20% off 10+ units for repair shops', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '20% OFF Bulk', complianceStatus: 'approved', reasoning: 'Volume electrical parts stocking for repair shops', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Emergency Restock Buyers', headline: 'Emergency Battery Stock — Fast Ship', subcopy: 'Rush order batteries during cold snaps — keep your shop running', cta: 'Order for Pickup Today', tone: 'Urgent', hasOffer: true, offerBadge: '10% OFF Rush', complianceStatus: 'pending', reasoning: 'Cold-weather emergency stock for PRO shops', image: '/images/placeholder-product.svg', approved: false },
   ],
-  // Sally Beauty Categories - Using product images from sally_products.json
-  'Hair Color': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Color Enthusiasts', headline: 'Transform Your Look', subcopy: 'Professional color results at home', cta: 'Shop Hair Color', tone: 'Exciting', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Color transformation appeals to enthusiasts', image: '/images/hair_color/WELLA17.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Vivid Creators', headline: 'Go Bold, Go Vivid', subcopy: 'Unleash your creativity with vibrant colors', cta: 'Explore Vivids', tone: 'Bold', hasOffer: true, offerBadge: 'Buy 2 Get 1', complianceStatus: 'approved', reasoning: 'Creative expression drives vivid color buyers', image: '/images/hair_color/MANIC2.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Professional Stylists', headline: 'Pro Color, Pro Results', subcopy: 'Salon-quality formulas for professionals', cta: 'Shop Pro Color', tone: 'Professional', hasOffer: true, offerBadge: '25% OFF $75+', complianceStatus: 'approved', reasoning: 'Quality and reliability for professionals', image: '/images/hair_color/ION87.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'First-Time Colorists', headline: 'Your Color Journey Starts Here', subcopy: 'Easy-to-use formulas for beginners', cta: 'Start Coloring', tone: 'Encouraging', hasOffer: true, offerBadge: '15% OFF First', complianceStatus: 'pending', reasoning: 'Beginner-friendly messaging reduces hesitation', image: '/images/hair_color/ARTFOX2.jpg', approved: false },
+  'Cooling and Heating': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Keep Your Engine Cool', subcopy: 'Coolant + thermostat kits for seasonal maintenance — fitment validated', cta: 'Find Parts for Your Vehicle', tone: 'Practical', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Seasonal cooling maintenance messaging', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', headline: 'Overheating? Fix It Now', subcopy: 'Radiator + hose repair parts with free coolant — same-day pickup', cta: 'Order for Pickup Today', tone: 'Urgent', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Overheating emergency repair messaging', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'PRO Cooling Components in Bulk', subcopy: 'Bulk cooling system parts — 25% off 20+ units for specialist shops', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '25% OFF Bulk', complianceStatus: 'approved', reasoning: 'Cooling specialist volume stocking', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', headline: 'Fleet Coolant Program', subcopy: 'Scheduled coolant program with contract pricing for fleet teams', cta: 'Bulk Order Now', tone: 'Efficient', hasOffer: true, offerBadge: '20% OFF Contract', complianceStatus: 'pending', reasoning: 'Fleet cooling maintenance contract appeal', image: '/images/placeholder-product.svg', approved: false },
   ],
-  'Hair Care': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Bond Repair Seekers', headline: 'Repair & Restore', subcopy: 'Olaplex bond-building technology', cta: 'Shop Olaplex', tone: 'Scientific', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Science-backed results for damaged hair', image: '/images/hair_care/SBS-009616.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Natural Hair Lovers', headline: 'Nature Meets Haircare', subcopy: 'Rosemary mint for healthy growth', cta: 'Shop Mielle', tone: 'Natural', hasOffer: true, offerBadge: 'Buy 2 Save 25%', complianceStatus: 'approved', reasoning: 'Natural ingredients appeal to conscious buyers', image: '/images/hair_care/SBS-762003.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Routine Restockers', headline: 'Restock Your Essentials', subcopy: 'Never run out of your favorites', cta: 'Restock Now', tone: 'Practical', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Convenience messaging for loyal customers', image: '/images/hair_care/ION12.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Treatment Seekers', headline: 'Deep Treatment, Deep Results', subcopy: 'Intensive care for your hair', cta: 'Shop Treatments', tone: 'Caring', hasOffer: true, offerBadge: '$10 OFF $50+', complianceStatus: 'pending', reasoning: 'Treatment-focused for problem solvers', image: '/images/hair_care/SBS-009285.jpg', approved: false },
+  'Ignition and Tune Up': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Tune Up & Save on Gas', subcopy: 'Spark plug + wire kits — improve fuel efficiency with a proper tune-up', cta: 'Find Parts for Your Vehicle', tone: 'Practical', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Fuel efficiency benefit messaging for tune-up buyers', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Price-Sensitive Promo Buyers', headline: 'Complete Tune-Up Bundle', subcopy: 'Plugs + wires + coil bundle at one great price — save on the complete set', cta: 'Order for Pickup Today', tone: 'Value', hasOffer: true, offerBadge: 'Bundle Deal', complianceStatus: 'approved', reasoning: 'Complete bundle value for price-conscious buyers', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'PRO Ignition Parts in Bulk', subcopy: 'Bulk ignition components — 20% off 30+ units for tune-up specialists', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '20% OFF Bulk', complianceStatus: 'approved', reasoning: 'Tune-up specialist bulk stocking', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', headline: 'Fleet Tune-Up Program', subcopy: 'Scheduled tune-up program with contract pricing for fleet maintenance', cta: 'Bulk Order Now', tone: 'Efficient', hasOffer: true, offerBadge: '25% OFF Contract', complianceStatus: 'pending', reasoning: 'Fleet tune-up schedule and contract appeal', image: '/images/placeholder-product.svg', approved: false },
   ],
-  'Styling Tools': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Pro Stylists', headline: 'Professional Tools, Pro Results', subcopy: 'BaBylissPRO nano titanium technology', cta: 'Shop Pro Tools', tone: 'Professional', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Professional-grade appeals to stylists', image: '/images/styling_tools/SBS-021477.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Home Stylists', headline: 'Salon Style at Home', subcopy: 'Hot Tools 24K gold curling iron', cta: 'Style at Home', tone: 'Empowering', hasOffer: true, offerBadge: '$25 OFF $100+', complianceStatus: 'approved', reasoning: 'Home styling empowerment messaging', image: '/images/styling_tools/SBS-345825.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Tool Upgraders', headline: 'Upgrade Your Styling Game', subcopy: 'Ion magnesium flat iron technology', cta: 'Upgrade Now', tone: 'Modern', hasOffer: true, offerBadge: '30% OFF Select', complianceStatus: 'approved', reasoning: 'Upgrade messaging for existing tool owners', image: '/images/styling_tools/ION105.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'First Tool Buyers', headline: 'Start Your Styling Journey', subcopy: 'Revlon one-step volumizer brush', cta: 'Get Started', tone: 'Welcoming', hasOffer: true, offerBadge: '15% OFF First', complianceStatus: 'pending', reasoning: 'Entry-level messaging for new buyers', image: '/images/styling_tools/SBS-170402.jpg', approved: false },
+  'Exhaust and Emissions': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Pass Emissions with Confidence', subcopy: 'Muffler + pipe kits for planned exhaust replacements — fitment guaranteed', cta: 'Find Parts for Your Vehicle', tone: 'Practical', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Emissions compliance messaging for planned replacements', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', headline: 'Exhaust Leak? Fix It Fast', subcopy: 'Emergency exhaust parts + free gasket — get back on the road quickly', cta: 'Order for Pickup Today', tone: 'Urgent', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Urgent exhaust leak repair messaging', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'PRO Exhaust Components in Bulk', subcopy: 'Bulk exhaust parts — 25% off 15+ units for muffler specialist shops', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '25% OFF Bulk', complianceStatus: 'approved', reasoning: 'Muffler shop specialist volume stocking', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Emergency Restock Buyers', headline: 'Emergency Exhaust Restock', subcopy: 'Same-day delivery on fast-moving exhaust SKUs for urgent shop needs', cta: 'Order for Pickup Today', tone: 'Urgent', hasOffer: true, offerBadge: '10% OFF Rush', complianceStatus: 'pending', reasoning: 'Emergency exhaust restock for PRO shops', image: '/images/placeholder-product.svg', approved: false },
   ],
-  'Nails': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Nail Artists', headline: 'Create Nail Art Magic', subcopy: 'OPI professional nail lacquer', cta: 'Shop OPI', tone: 'Creative', hasOffer: true, offerBadge: '25% OFF Pro', complianceStatus: 'approved', reasoning: 'Creative expression for nail artists', image: '/images/nails/SBS-011313.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Gel Enthusiasts', headline: 'Long-Lasting Gel Perfection', subcopy: 'Gelish soak-off gel polish', cta: 'Shop Gel', tone: 'Lasting', hasOffer: true, offerBadge: 'Buy 3 Get 1', complianceStatus: 'approved', reasoning: 'Durability appeals to gel lovers', image: '/images/nails/SBS-004882.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'DIY Manicurists', headline: 'Salon Nails at Home', subcopy: 'Seche Vite fast dry top coat', cta: 'DIY Nails', tone: 'Practical', hasOffer: true, offerBadge: '20% OFF Kits', complianceStatus: 'approved', reasoning: 'DIY empowerment for home manicurists', image: '/images/nails/SBS-215000.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Color Collectors', headline: 'Expand Your Color Collection', subcopy: 'Pure acetone for perfect prep', cta: 'Collect Colors', tone: 'Fun', hasOffer: true, offerBadge: 'Buy 2 Save 30%', complianceStatus: 'pending', reasoning: 'Collection mindset for color enthusiasts', image: '/images/nails/BTYSEC9.jpg', approved: false },
+  'Steering and Suspension': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Smooth Ride, Safe Drive', subcopy: 'Strut + shock kits for high-mileage vehicles — improve handling and comfort', cta: 'Find Parts for Your Vehicle', tone: 'Safety', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Safety and comfort messaging for suspension maintenance', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Urgent Repair Buyers', headline: 'Steering Problems? Fix Today', subcopy: 'Tie rod + ball joint parts — same-day pickup + free alignment check', cta: 'Order for Pickup Today', tone: 'Urgent', hasOffer: true, offerBadge: '20% OFF', complianceStatus: 'approved', reasoning: 'Urgent steering repair with added alignment value', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'PRO Suspension Parts in Bulk', subcopy: 'Bulk suspension components — 25% off 20+ units for alignment shops', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '25% OFF Bulk', complianceStatus: 'approved', reasoning: 'Alignment shop specialist volume stocking', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', headline: 'Fleet Suspension Program', subcopy: 'Scheduled suspension maintenance with contract pricing for fleets', cta: 'Bulk Order Now', tone: 'Efficient', hasOffer: true, offerBadge: '20% OFF Contract', complianceStatus: 'pending', reasoning: 'Fleet suspension maintenance contract appeal', image: '/images/placeholder-product.svg', approved: false },
   ],
-  'Cosmetics & Lashes': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Lash Lovers', headline: 'Lashes That Wow', subcopy: 'Ardell Wispies for natural drama', cta: 'Shop Lashes', tone: 'Glamorous', hasOffer: true, offerBadge: 'Buy 2 Get 1', complianceStatus: 'approved', reasoning: 'Glamour messaging for lash enthusiasts', image: '/images/cosmetics_lashes/SBS-001686.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Brow Perfectionists', headline: 'Perfect Brows Every Time', subcopy: 'RefectoCil professional brow dye', cta: 'Shop Brows', tone: 'Precise', hasOffer: true, offerBadge: '20% OFF Brows', complianceStatus: 'approved', reasoning: 'Precision appeals to brow perfectionists', image: '/images/cosmetics_lashes/IBN.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Makeup Minimalists', headline: 'Effortless Beauty Essentials', subcopy: 'Palladio rice powder for flawless finish', cta: 'Shop Essentials', tone: 'Simple', hasOffer: true, offerBadge: '15% OFF Basics', complianceStatus: 'approved', reasoning: 'Simplicity for minimalist beauty lovers', image: '/images/cosmetics_lashes/PLADIO7.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Pro MUAs', headline: 'Pro-Grade Cosmetics', subcopy: 'Duo lash adhesive for all-day hold', cta: 'Shop Pro', tone: 'Professional', hasOffer: true, offerBadge: '$15 OFF $75+', complianceStatus: 'pending', reasoning: 'Professional quality for MUAs', image: '/images/cosmetics_lashes/SBS-240027.jpg', approved: false },
-  ],
-  "Men's Grooming": [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Barber Pros', headline: 'Barber-Grade Precision', subcopy: 'Andis T-Outliner for clean lines', cta: 'Shop Clippers', tone: 'Professional', hasOffer: true, offerBadge: '25% OFF Clippers', complianceStatus: 'approved', reasoning: 'Professional precision for barbers', image: '/images/mens_grooming/SBS-395010.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Beard Enthusiasts', headline: 'Beard Care Essentials', subcopy: 'Gibs grooming beard oil for the perfect beard', cta: 'Shop Beard Care', tone: 'Masculine', hasOffer: true, offerBadge: 'Buy 2 Get 1', complianceStatus: 'approved', reasoning: 'Beard pride messaging for enthusiasts', image: '/images/mens_grooming/SBS-003300.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Home Groomers', headline: 'Pro Grooming at Home', subcopy: 'Wahl Magic Clip cordless clipper', cta: 'Groom at Home', tone: 'Practical', hasOffer: true, offerBadge: '20% OFF Kits', complianceStatus: 'approved', reasoning: 'Home grooming convenience', image: '/images/mens_grooming/SBS-785007.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Classic Gentlemen', headline: 'Timeless Grooming Classics', subcopy: 'Clubman Pinaud aftershave tradition', cta: 'Shop Classics', tone: 'Classic', hasOffer: true, offerBadge: '15% OFF Aftershave', complianceStatus: 'pending', reasoning: 'Classic appeal for traditional gentlemen', image: '/images/mens_grooming/SBS-625016.jpg', approved: false },
-  ],
-  'Textured Hair Care': [
-    { id: 'cr-1', segmentId: 'seg-1', segmentName: 'Curl Definers', headline: 'Define Your Curls', subcopy: 'The Doux mousse for perfect definition', cta: 'Shop Curl Care', tone: 'Empowering', hasOffer: true, offerBadge: '20% OFF Curls', complianceStatus: 'approved', reasoning: 'Curl empowerment messaging', image: '/images/textured_hair_care/SBS-801153.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'seg-2', segmentName: 'Protective Stylists', headline: 'Protect & Style', subcopy: 'Camille Rose twisting butter for styles that last', cta: 'Shop Protective', tone: 'Nurturing', hasOffer: true, offerBadge: 'Buy 2 Get 1', complianceStatus: 'approved', reasoning: 'Protection-focused for style longevity', image: '/images/textured_hair_care/SBS-310320.jpg', approved: false },
-    { id: 'cr-3', segmentId: 'seg-3', segmentName: 'Moisture Seekers', headline: 'Hydration Station', subcopy: 'Cantu shea butter leave-in cream', cta: 'Shop Moisture', tone: 'Nourishing', hasOffer: true, offerBadge: '25% OFF Moisture', complianceStatus: 'approved', reasoning: 'Moisture-focused for dry hair concerns', image: '/images/textured_hair_care/SBS-459068.jpg', approved: false },
-    { id: 'cr-4', segmentId: 'seg-4', segmentName: 'Natural Hair Newbies', headline: 'Start Your Natural Journey', subcopy: 'Mielle rosemary mint oil for growth', cta: 'Get Started', tone: 'Welcoming', hasOffer: true, offerBadge: '15% OFF First', complianceStatus: 'pending', reasoning: 'Beginner-friendly for natural hair newbies', image: '/images/textured_hair_care/SBS-762003.jpg', approved: false },
-  ],
-  // Michaels Categories - 2 segments
-  'Christmas Trees': [
-    { id: 'cr-1', segmentId: 'mseg-1', segmentName: 'Holiday Decorators', headline: '60% OFF Holiday Decor!', subcopy: 'Ornaments, tree toppers, and festive lights', cta: 'Shop Decor', tone: 'Festive', hasOffer: true, offerBadge: '60% OFF Decor', complianceStatus: 'approved', reasoning: 'Holiday decor enthusiasts seeking ornaments and accessories', image: '/images/christmas_decor_collections/10788224_1.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'mseg-2', segmentName: 'Premium Tree Seekers', headline: '60% OFF Christmas Trees!', subcopy: 'Premium pre-lit trees with warm white LEDs', cta: 'Shop Trees', tone: 'Luxurious', hasOffer: true, offerBadge: '60% OFF Trees', complianceStatus: 'approved', reasoning: 'Quality messaging for premium tree seekers', image: '/images/christmas_trees/10772929_15.jpg', approved: false },
-  ],
-  'Christmas Decor Collections': [
-    { id: 'cr-1', segmentId: 'mseg-1', segmentName: 'Holiday Decorators', headline: '60% OFF Holiday Decor!', subcopy: 'Ornaments, tree toppers, and festive lights', cta: 'Shop Decor', tone: 'Festive', hasOffer: true, offerBadge: '60% OFF Decor', complianceStatus: 'approved', reasoning: 'Holiday decor enthusiasts seeking ornaments and accessories', image: '/images/christmas_decor_collections/10788224_1.jpg', approved: false },
-    { id: 'cr-2', segmentId: 'mseg-2', segmentName: 'Premium Tree Seekers', headline: '60% OFF Christmas Trees!', subcopy: 'Premium pre-lit trees with warm white LEDs', cta: 'Shop Trees', tone: 'Luxurious', hasOffer: true, offerBadge: '60% OFF Trees', complianceStatus: 'approved', reasoning: 'Quality messaging for premium tree seekers', image: '/images/christmas_trees/10772929_15.jpg', approved: false },
-  ],
-  // TSC Categories - 2 segments
-  'Home Decor': [
-    { id: 'cr-1', segmentId: 'tseg-1', segmentName: 'Farmhouse Enthusiasts', headline: '60% OFF Farmhouse Favorites!', subcopy: 'Red Shed rustic home decor and country accents', cta: 'Shop Home', tone: 'Rustic', hasOffer: true, offerBadge: '60% OFF Home', complianceStatus: 'approved', reasoning: 'Country-style appeal for farmhouse decor lovers', image: 'images/home_decor/253294399.webp', approved: false },
-    { id: 'cr-2', segmentId: 'tseg-2', segmentName: 'Holiday Shoppers', headline: '60% OFF Holiday Decor!', subcopy: 'Festive outdoor decorations and porch accents', cta: 'Shop Holiday', tone: 'Festive', hasOffer: true, offerBadge: '60% OFF Decor', complianceStatus: 'approved', reasoning: 'Seasonal appeal for holiday decoration shoppers', image: 'images/christmas_decor/252614899.webp', approved: false },
-  ],
-  'Christmas Decor': [
-    { id: 'cr-1', segmentId: 'tseg-1', segmentName: 'Farmhouse Enthusiasts', headline: '60% OFF Farmhouse Favorites!', subcopy: 'Red Shed rustic home decor and country accents', cta: 'Shop Home', tone: 'Rustic', hasOffer: true, offerBadge: '60% OFF Home', complianceStatus: 'approved', reasoning: 'Country-style appeal for farmhouse decor lovers', image: 'images/home_decor/252829299.webp', approved: false },
-    { id: 'cr-2', segmentId: 'tseg-2', segmentName: 'Holiday Shoppers', headline: '60% OFF Christmas Decor!', subcopy: 'Metal yard stakes, LED decorations, and festive door mats', cta: 'Shop Christmas', tone: 'Festive', hasOffer: true, offerBadge: '60% OFF Decor', complianceStatus: 'approved', reasoning: 'Outdoor holiday decoration appeal for seasonal shoppers', image: 'images/christmas_decor/252600999.webp', approved: false },
+  'Lighting': [
+    { id: 'cr-1', segmentId: 'seg-diy-1', segmentName: 'DIY Routine Maintenance Buyers', headline: 'Brighter Lights, Safer Nights', subcopy: 'Headlight + bulb upgrade kits — easy installation, performance benefits', cta: 'Find Parts for Your Vehicle', tone: 'Safety', hasOffer: true, offerBadge: '15% OFF', complianceStatus: 'approved', reasoning: 'Safety and performance upgrade messaging for lighting', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-2', segmentId: 'seg-diy-2', segmentName: 'DIY Price-Sensitive Promo Buyers', headline: 'Buy 2 Bulbs, Get 1 Free', subcopy: 'Stock up on replacement bulbs at the best price — all fitments available', cta: 'Order for Pickup Today', tone: 'Value', hasOffer: true, offerBadge: 'Buy 2 Get 1', complianceStatus: 'approved', reasoning: 'Multi-buy value messaging for lighting buyers', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-3', segmentId: 'seg-pro-1', segmentName: 'PRO High-Value Shops', headline: 'Bulk Lighting for Service Centers', subcopy: 'Bulk lighting inventory — 20% off 30+ units as add-on installation service', cta: 'Bulk Order Now', tone: 'Professional', hasOffer: true, offerBadge: '20% OFF Bulk', complianceStatus: 'approved', reasoning: 'Service center lighting add-on stocking', image: '/images/placeholder-product.svg', approved: false },
+    { id: 'cr-4', segmentId: 'seg-pro-2', segmentName: 'PRO Fleet Operators', headline: 'Fleet Lighting Compliance', subcopy: 'Fleet headlight/tail light compliance program with contract pricing', cta: 'Bulk Order Now', tone: 'Efficient', hasOffer: true, offerBadge: '25% OFF Contract', complianceStatus: 'pending', reasoning: 'Fleet lighting compliance and standards messaging', image: '/images/placeholder-product.svg', approved: false },
   ],
 }
 
-const deriveAudienceStrategy = (category: string, client?: 'sally' | 'michaels' | 'tsc') => {
-  // For Michaels, use Christmas Trees as default category if not specified
-  // For TSC, use Home Decor as default category if not specified
-  let effectiveCategory = category
-  if (client === 'michaels' && !CATEGORY_SEGMENTS[category]) {
-    effectiveCategory = 'Christmas Trees'
-  } else if (client === 'tsc' && !CATEGORY_SEGMENTS[category]) {
-    effectiveCategory = 'Home Decor'
+const deriveAudienceStrategy = (category: string, _client?: 'autoparts', detectedCategories?: string[], selectedGoalId?: string) => {
+  let segments: { id: string; name: string; size: number; percentage: number; description: string; logic: string }[]
+
+  // If a playbook goal was selected, use its deterministic segments
+  const playbook = selectedGoalId ? BUSINESS_GOAL_PLAYBOOKS.find(g => g.id === selectedGoalId) : null
+  if (playbook && playbook.segments) {
+    segments = playbook.segments.map((seg, index) => ({
+      id: `seg-goal-${index + 1}`,
+      name: seg.name,
+      size: index === 0 ? 145000 : 82000,
+      percentage: index === 0 ? 58.5 : 41.5,
+      description: seg.why,
+      logic: 'rule-based',
+    }))
+  } else if (detectedCategories && detectedCategories.length > 0) {
+    // Build one segment per detected category — pick the primary (first) segment from each
+    segments = detectedCategories.map((cat, index) => {
+      const catSegments = CATEGORY_SEGMENTS[cat] || CATEGORY_SEGMENTS['Oil and Lubricants']
+      const primary = catSegments[0]
+      return { ...primary, id: `seg-cat-${index + 1}` }
+    })
+  } else {
+    segments = CATEGORY_SEGMENTS[category] || CATEGORY_SEGMENTS['Oil and Lubricants']
   }
-  
-  const segments = CATEGORY_SEGMENTS[effectiveCategory] || (client === 'michaels' ? CATEGORY_SEGMENTS['Christmas Trees'] : client === 'tsc' ? CATEGORY_SEGMENTS['Home Decor'] : CATEGORY_SEGMENTS['Hair Color'])
+
   return {
     segments,
-    totalCoverage: segments.reduce((acc, s) => acc + s.percentage, 0),
-    segmentationLayers: client === 'michaels' 
-      ? [
-          { name: 'Purchase Recency', type: 'rule-based' as const },
-          { name: 'Seasonal Buyer', type: 'statistical' as const },
-          { name: 'Holiday Affinity', type: 'statistical' as const },
-          { name: 'Category Preference', type: 'rule-based' as const },
-        ]
-      : client === 'tsc'
-      ? [
-          { name: 'Purchase Recency', type: 'rule-based' as const },
-          { name: 'Farmhouse Affinity', type: 'statistical' as const },
-          { name: 'Seasonal Buyer', type: 'statistical' as const },
-          { name: 'Product Category', type: 'rule-based' as const },
-        ]
-      : [
-          { name: 'Lifecycle', type: 'rule-based' as const },
-          { name: 'Value Tier (RFM)', type: 'statistical' as const },
-          { name: 'Promo Sensitivity', type: 'statistical' as const },
-          { name: 'Category Affinity', type: 'rule-based' as const },
-        ]
+    totalCoverage: Math.round(segments.reduce((acc, s) => acc + s.percentage, 0) * 10) / 10,
+    segmentationLayers: [
+      { name: 'Customer Type (PRO/DIY)', type: 'rule-based' as const },
+      { name: 'Purchase Recency', type: 'rule-based' as const },
+      { name: 'Category Affinity', type: 'statistical' as const },
+      { name: 'Vehicle Age Bucket', type: 'rule-based' as const },
+      { name: 'Failure Signals', type: 'statistical' as const },
+      { name: 'Price Sensitivity', type: 'statistical' as const },
+    ]
   }
 }
 
-const deriveOfferMapping = (category: string, client?: 'sally' | 'michaels' | 'tsc') => {
-  // For Michaels, use Christmas Trees as default if category not found
-  // For TSC, use Home Decor as default if category not found
-  if (client === 'michaels' && !CATEGORY_OFFERS[category]) {
-    return CATEGORY_OFFERS['Christmas Trees'] || CATEGORY_OFFERS['Hair Color']
+const deriveOfferMapping = (category: string, _client?: 'autoparts', detectedCategories?: string[], selectedGoalId?: string) => {
+  // If a playbook goal was selected, build offer mapping from playbook categories + segments
+  const playbook = selectedGoalId ? BUSINESS_GOAL_PLAYBOOKS.find(g => g.id === selectedGoalId) : null
+  if (playbook && playbook.categories && playbook.segments) {
+    const discountStr = playbook.interpretation?.context.discountStrategy || '15–25%'
+    return playbook.categories.map((cat, index) => {
+      const segIndex = index < playbook.segments!.length ? index : 0
+      return {
+        segmentId: `seg-goal-${segIndex + 1}`,
+        segmentName: playbook.segments![segIndex].name,
+        productGroup: cat.name,
+        promotion: `${cat.name} — ${discountStr}`,
+        promoId: `promo-goal-${index + 1}`,
+        promoValue: discountStr,
+        expectedLift: 12 + index * 4,
+        marginImpact: -(3 + index * 2),
+        overstockCoverage: 65 + index * 10,
+      }
+    })
   }
-  if (client === 'tsc' && !CATEGORY_OFFERS[category]) {
-    return CATEGORY_OFFERS['Home Decor'] || CATEGORY_OFFERS['Hair Color']
+
+  if (detectedCategories && detectedCategories.length > 0) {
+    // One offer per detected category — pick the primary (first) offer from each
+    return detectedCategories.map((cat, index) => {
+      const catOffers = CATEGORY_OFFERS[cat] || CATEGORY_OFFERS['Oil and Lubricants']
+      return { ...catOffers[0], segmentId: `seg-cat-${index + 1}` }
+    })
   }
-  return CATEGORY_OFFERS[category] || CATEGORY_OFFERS['Hair Color']
+  return CATEGORY_OFFERS[category] || CATEGORY_OFFERS['Oil and Lubricants']
 }
 
-const deriveCreatives = (category: string, segmentNames?: string[], client?: 'sally' | 'michaels' | 'tsc') => {
-  // For Michaels, use Christmas Trees as default if category not found
-  // For TSC, use Home Decor as default if category not found
-  let effectiveCategory = category
-  if (client === 'michaels' && !CATEGORY_CREATIVES[category]) {
-    effectiveCategory = 'Christmas Trees'
-  } else if (client === 'tsc' && !CATEGORY_CREATIVES[category]) {
-    effectiveCategory = 'Home Decor'
+// Banner images per playbook goal — mapped to segments
+const GOAL_CREATIVE_BANNERS: Record<string, { segmentIndex: number; headline: string; subcopy: string; cta: string; tone: string; image: string }[]> = {
+  'clear-inventory': [
+    { segmentIndex: 0, headline: 'Clearance Event — Up to 35% Off', subcopy: 'Brake pads, rotors, batteries & more — while supplies last', cta: 'Shop Clearance', tone: 'Urgency', image: '/images/Banner Assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_1.webp' },
+    { segmentIndex: 1, headline: 'Repair Parts — Ready Now', subcopy: 'Brakes, batteries, wipers & filters — in stock for immediate pickup', cta: 'Find Your Parts', tone: 'Action', image: '/images/Banner Assets/Adv_Rewards_Page_Adv_Rewards_Week_April_2026_2.webp' },
+  ],
+  'accelerate-revenue': [
+    { segmentIndex: 0, headline: 'Oil Change Kit — Everything You Need', subcopy: 'Full synthetic oil + filter combos — save when you bundle', cta: 'Shop Oil Kits', tone: 'Value', image: '/images/Banner Assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_4.webp' },
+    { segmentIndex: 1, headline: 'PRO Fleet Oil Program', subcopy: 'Volume pricing on cases — scheduled delivery for your fleet', cta: 'Get Fleet Pricing', tone: 'Professional', image: '/images/Banner Assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_6.webp' },
+  ],
+  'protect-margins': [
+    { segmentIndex: 0, headline: 'Bulk Maintenance — Volume Savings', subcopy: 'Case pricing on brake pads, filters & wiper blades for PRO shops', cta: 'Bulk Order Now', tone: 'Professional', image: '/images/Banner Assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_7.webp' },
+    { segmentIndex: 1, headline: 'Premium Value Packs', subcopy: 'Quality parts in multi-packs — no coupons needed, just great value', cta: 'Shop Value Packs', tone: 'Premium', image: '/images/Banner Assets/Adv_Rewards_Page_Adv-Rewards_Week_April_2026_8.webp' },
+  ],
+}
+
+const deriveCreatives = (category: string, segmentNames?: string[], _client?: 'autoparts', detectedCategories?: string[], selectedGoalId?: string) => {
+  // If a playbook goal was selected, use goal-specific creatives with banner images
+  if (selectedGoalId && GOAL_CREATIVE_BANNERS[selectedGoalId]) {
+    const playbook = BUSINESS_GOAL_PLAYBOOKS.find(g => g.id === selectedGoalId)
+    const banners = GOAL_CREATIVE_BANNERS[selectedGoalId]
+    return banners.map((banner, index) => {
+      const segName = playbook?.segments?.[banner.segmentIndex]?.name || segmentNames?.[banner.segmentIndex] || 'All Customers'
+      return {
+        id: `cr-goal-${index + 1}`,
+        segmentId: `seg-goal-${banner.segmentIndex + 1}`,
+        segmentName: segName,
+        headline: banner.headline,
+        subcopy: banner.subcopy,
+        cta: banner.cta,
+        tone: banner.tone,
+        hasOffer: true,
+        offerBadge: playbook?.interpretation?.context.discountStrategy || '15–25%',
+        complianceStatus: 'approved',
+        reasoning: `Creative tailored for ${segName} — ${banner.tone.toLowerCase()} tone drives conversion`,
+        image: banner.image,
+        approved: false,
+      }
+    })
   }
-  
-  const baseCreatives = CATEGORY_CREATIVES[effectiveCategory] || (client === 'michaels' ? CATEGORY_CREATIVES['Christmas Trees'] : client === 'tsc' ? CATEGORY_CREATIVES['Home Decor'] : CATEGORY_CREATIVES['Hair Color'])
-  
-  // Get product groups to use their images (client-specific)
-  const productGroups = getProductGroupsByClient(client || 'sally', segmentNames)
-  
-  // Map creatives to use product images from their corresponding segment's product group
+
+  if (detectedCategories && detectedCategories.length > 0) {
+    // One creative per detected category — pick the primary (first) creative from each
+    return detectedCategories.map((cat, index) => {
+      const catCreatives = CATEGORY_CREATIVES[cat] || CATEGORY_CREATIVES['Oil and Lubricants']
+      const primary = catCreatives[0]
+      return {
+        ...primary,
+        id: `cr-${index + 1}`,
+        segmentId: `seg-cat-${index + 1}`,
+        segmentName: segmentNames?.[index] || primary.segmentName,
+      }
+    })
+  }
+
+  const baseCreatives = CATEGORY_CREATIVES[category] || CATEGORY_CREATIVES['Oil and Lubricants']
   return baseCreatives.map((creative, index) => {
-    const productGroup = productGroups[index]
-    // Use the first product image from the segment's product group
-    const productImage = productGroup?.skus?.[0]?.image || creative.image
-    
     return {
       ...creative,
       segmentName: segmentNames?.[index] || creative.segmentName,
-      image: productImage
     }
   })
 }
@@ -883,17 +865,17 @@ export function CampaignWorkspace() {
       
       // Generate missing data based on current step
       if (campaign.currentStep === 'promo' && !campaign.offerMapping) {
-        updates.offerMapping = deriveOfferMapping(campaign.category || 'Hair Color', campaign.client)
+        updates.offerMapping = deriveOfferMapping(campaign.category || 'Oil and Lubricants', campaign.client, campaign.detectedCategories || campaign.derivedContext?.detectedCategories, campaign.selectedGoalId)
       }
       if (campaign.currentStep === 'creative' && !campaign.creatives) {
         const segmentNames = campaign.audienceStrategy?.segments.map(s => s.name)
-        updates.creatives = deriveCreatives(campaign.category || 'Hair Color', segmentNames, campaign.client)
+        updates.creatives = deriveCreatives(campaign.category || 'Oil and Lubricants', segmentNames, campaign.client, campaign.detectedCategories || campaign.derivedContext?.detectedCategories, campaign.selectedGoalId)
       }
       if (campaign.currentStep === 'segment' && !campaign.audienceStrategy) {
-        updates.audienceStrategy = deriveAudienceStrategy(campaign.category || 'Hair Color', campaign.client)
+        updates.audienceStrategy = deriveAudienceStrategy(campaign.category || 'Oil and Lubricants', campaign.client, campaign.detectedCategories || campaign.derivedContext?.detectedCategories, campaign.selectedGoalId)
       }
       if (campaign.currentStep === 'context' && campaign.goal && !campaign.derivedContext) {
-        updates.derivedContext = deriveContext(campaign.goal, campaign.category || 'Hair Color', campaign.channel || undefined, campaign.client)
+        updates.derivedContext = deriveContext(campaign.goal, campaign.category || 'Oil and Lubricants', campaign.channel || undefined, campaign.client)
       }
       
       if (Object.keys(updates).length > 0) {
@@ -1767,38 +1749,56 @@ function CampaignFlowView({
         </div>
       </div>
 
-      {/* Progress Stepper */}
+      {/* Progress Stepper — Fully Navigable */}
       <div className="bg-surface border-b border-border px-6 py-3">
         <div className="flex items-center gap-2">
           {STEPS.map((step, i) => {
-            const isLocked = campaign.lockedSteps.includes(step.id)
+            const isCompleted = campaign.lockedSteps.includes(step.id)
             const isCurrent = campaign.currentStep === step.id
             const stepState = campaign.stepStates[step.id]
             const StepIcon = step.icon
-            const canNavigate = isLocked && !isAlanWorking // Can click on completed steps
+            const currentIdx = STEPS.findIndex(s => s.id === campaign.currentStep)
+            const stepIdx = i
+            const isVisited = isCompleted || stepIdx <= currentIdx
+            const canNavigate = isVisited && !isCurrent && !isAlanWorking
             
             return (
               <div key={step.id} className="flex items-center">
                 <button
                   onClick={() => canNavigate && onGoToStep(step.id)}
                   disabled={!canNavigate && !isCurrent}
+                  title={canNavigate ? `Go back to ${step.label}` : undefined}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all',
-                    isLocked ? 'bg-success/10 text-success' :
-                    isCurrent ? 'bg-primary text-white shadow-lg shadow-primary/25' :
-                    stepState?.status === 'thinking' ? 'bg-agent/10 text-agent' :
-                    'bg-surface-tertiary text-text-muted',
-                    canNavigate && 'cursor-pointer hover:bg-success/20 hover:ring-2 hover:ring-success/30'
+                    'group/step flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 relative',
+                    isCurrent 
+                      ? 'bg-primary text-white shadow-lg shadow-primary/25' 
+                      : isCompleted 
+                        ? 'bg-success/10 text-success' 
+                        : stepState?.status === 'thinking' 
+                          ? 'bg-agent/10 text-agent' 
+                          : 'bg-surface-tertiary text-text-muted',
+                    canNavigate && 'cursor-pointer hover:ring-2 hover:ring-primary/40 hover:bg-primary/10 hover:text-primary hover:shadow-md'
                   )}
                 >
-                  {isLocked ? <Check className="w-4 h-4" /> : 
-                   stepState?.status === 'thinking' ? <Loader2 className="w-4 h-4 animate-spin" /> :
-                   <StepIcon className="w-4 h-4" />}
+                  {isCompleted ? (
+                    <>
+                      <Check className={cn('w-4 h-4 transition-all duration-200', canNavigate && 'group-hover/step:hidden')} />
+                      <Edit3 className={cn('w-4 h-4 hidden transition-all duration-200', canNavigate && 'group-hover/step:block')} />
+                    </>
+                  ) : stepState?.status === 'thinking' ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <StepIcon className="w-4 h-4" />
+                  )}
                   {step.label}
-                  {isLocked && <Lock className="w-3 h-3 ml-1" />}
                 </button>
                 {i < STEPS.length - 1 && (
-                  <ChevronRight className={cn('w-5 h-5 mx-2', isLocked ? 'text-success' : 'text-border')} />
+                  <div className="relative mx-2">
+                    <ChevronRight className={cn(
+                      'w-5 h-5 transition-colors duration-200',
+                      isCompleted ? 'text-success' : 'text-border'
+                    )} />
+                  </div>
                 )}
               </div>
             )
@@ -1861,9 +1861,14 @@ function CampaignFlowView({
                     'Identifying relevant customer signals',
                     'Evaluating channel and region implications',
                     'Generating strategic recommendations',
-                  ], () => ({
-                    derivedContext: deriveContext(campaign.goal, campaign.category!, campaign.channel || undefined, campaign.client)
-                  }))
+                  ], () => {
+                    const ctx = deriveContext(campaign.goal, campaign.category!, campaign.channel || undefined, campaign.client)
+                    return {
+                      derivedContext: ctx,
+                      detectedCategories: ctx.detectedCategories,
+                      category: campaign.category || ctx.detectedCategories[0],
+                    }
+                  })
                 }
                 isWorking={isAlanWorking}
               />
@@ -1879,7 +1884,7 @@ function CampaignFlowView({
                     'Optimizing for campaign objective',
                   ], () => ({
                     name: campaign.derivedContext!.campaignName,
-                    audienceStrategy: deriveAudienceStrategy(campaign.category!, campaign.client)
+                    audienceStrategy: deriveAudienceStrategy(campaign.category!, campaign.client, campaign.detectedCategories || campaign.derivedContext?.detectedCategories, campaign.selectedGoalId)
                   }))
                 }
                 onGoBack={() => {
@@ -1898,9 +1903,10 @@ function CampaignFlowView({
                     'Applying margin protection rules',
                     'Finalizing product groups',
                   ], () => ({
-                    offerMapping: deriveOfferMapping(campaign.category!, campaign.client)
+                    offerMapping: deriveOfferMapping(campaign.category!, campaign.client, campaign.detectedCategories || campaign.derivedContext?.detectedCategories, campaign.selectedGoalId)
                   }))
                 }
+                onGoBack={() => onGoToStep('context')}
                 onUpdateStrategy={(strategy) => onUpdate({ audienceStrategy: strategy })}
                 onSaveDraft={onSaveDraft}
                 isWorking={isAlanWorking}
@@ -1917,6 +1923,7 @@ function CampaignFlowView({
                     'Scoring promotion fit',
                   ], () => ({}))
                 }
+                onGoBack={() => onGoToStep('segment')}
                 onSaveDraft={onSaveDraft}
                 isWorking={isAlanWorking}
               />
@@ -1924,6 +1931,7 @@ function CampaignFlowView({
             {campaign.currentStep === 'promo' && (
               <OfferStep
                 campaign={campaign}
+                onGoBack={() => onGoToStep('product')}
                 onConfirm={() => {
                   const segmentNames = campaign.audienceStrategy?.segments.map(s => s.name)
                   onLockStep('promo', 'creative', 'Alan is generating segment-specific creatives...', [
@@ -1932,7 +1940,7 @@ function CampaignFlowView({
                     'Matching imagery to messaging',
                     'Running compliance checks',
                   ], () => ({
-                    creatives: deriveCreatives(campaign.category!, segmentNames, campaign.client),
+                    creatives: deriveCreatives(campaign.category!, segmentNames, campaign.client, campaign.detectedCategories || campaign.derivedContext?.detectedCategories, campaign.selectedGoalId),
                     promoSkipped: false
                   }))
                 }}
@@ -1944,7 +1952,7 @@ function CampaignFlowView({
                     'Matching imagery to messaging',
                     'Running compliance checks',
                   ], () => ({
-                    creatives: deriveCreatives(campaign.category!, segmentNames, campaign.client).map(c => ({ ...c, hasOffer: false, offerBadge: undefined })),
+                    creatives: deriveCreatives(campaign.category!, segmentNames, campaign.client, campaign.detectedCategories || campaign.derivedContext?.detectedCategories, campaign.selectedGoalId).map(c => ({ ...c, hasOffer: false, offerBadge: undefined })),
                     promoSkipped: true
                   }))
                 }}
@@ -2010,6 +2018,7 @@ function CampaignFlowView({
                     'Preparing launch summary',
                   ], () => ({}))
                 }
+                onGoBack={() => onGoToStep('promo')}
                 onSaveDraft={onSaveDraft}
                 isWorking={isAlanWorking}
               />
@@ -2017,6 +2026,8 @@ function CampaignFlowView({
             {campaign.currentStep === 'review' && (
               <ReviewStep
                 campaign={campaign}
+                onGoBack={() => onGoToStep('creative')}
+                onGoToStep={onGoToStep}
                 onSaveDraft={onSaveDraft}
                 onLaunch={() => {
                   onUpdate({ status: 'active' })
@@ -2049,8 +2060,230 @@ interface AssumptionToken {
   editable: boolean
 }
 
+// Business Goal → Campaign Playbook Mapping (1:1, no dynamic guessing)
+// Fleet & Emergency Parts is strategically embedded (not isolated) — injected into PRO segments
+const BUSINESS_GOAL_PLAYBOOKS = [
+  // ── 3 ACTIONABLE GOALS ──
+  {
+    id: 'clear-inventory',
+    icon: Package,
+    iconGradient: 'from-amber-500 to-orange-600',
+    iconBg: 'bg-amber-500/10',
+    label: 'Clear Inventory / Overstock',
+    subtitle: '3 Categories — Brakes, Wipers, Filters',
+    locked: false,
+    campaignLabel: 'Multi-Category Clearance',
+    goal: 'Clear excess inventory across Brake & Battery Essentials, Wiper & Visibility Products, and Air Filter & PCV Components by activating discount-led demand for DIY and repair buyers',
+    client: 'autoparts' as const,
+    interpretation: {
+      summary: 'Alan has identified **excess inventory concentration** across fast-moving repair and maintenance categories. To accelerate sell-through, I will activate a **multi-category clearance strategy** focused on 3 high-pressure categories.',
+      bullets: [
+        'Drive immediate movement through discount-led demand',
+        'Capture urgent repair needs (brakes, batteries)',
+        'Increase basket size via low-friction add-ons like filters',
+      ],
+      context: {
+        campaignType: 'Multi-Category Clearance Campaign',
+        primaryIntent: 'Inventory Clearance + Basket Building',
+        channel: 'Online + In-Store',
+        productFocus: 'Brake & Battery · Wiper & Visibility · Air Filter & PCV',
+        discountStrategy: 'Moderate to High (20–35%)',
+        constraints: ['Protect margin thresholds on premium SKUs', 'Fleet & Emergency Parts injected for PRO urgency signals'],
+      },
+    },
+    categories: [
+      {
+        name: 'Brake and Battery Essentials',
+        imagePath: '/images/Brake and Battery Essentials',
+        products: [
+          { sku: 'SKU 2-12257635', name: 'Duralast Gold Brake Pads', image: '/images/Brake and Battery Essentials/SKU 2-12257635.webp' },
+          { sku: 'SKU 2-12257833', name: 'Duralast Coated Rotors', image: '/images/Brake and Battery Essentials/SKU 2-12257833.webp' },
+          { sku: 'SKU 2-12257842', name: 'Valucraft Battery 24F', image: '/images/Brake and Battery Essentials/SKU 2-12257842.webp' },
+          { sku: 'SKU 2-12257867', name: 'Brake Hardware Kit', image: '/images/Brake and Battery Essentials/SKU 2-12257867.webp' },
+        ],
+      },
+      {
+        name: 'Wiper and Visibility Products',
+        imagePath: '/images/Viper and Visibility Products',
+        products: [
+          { sku: 'SKU 6-11386730', name: 'Bosch Icon Beam Wiper 22"', image: '/images/Viper and Visibility Products/SKU 6-11386730.webp' },
+          { sku: 'SKU 6-11688408', name: 'Rain-X Latitude Wiper 18"', image: '/images/Viper and Visibility Products/SKU 6-11688408.webp' },
+          { sku: 'SKU 6-50014524', name: 'Sylvania Headlight Bulb', image: '/images/Viper and Visibility Products/SKU 6-50014524.webp' },
+          { sku: 'SKU 6-7070036', name: 'Prestone Washer Fluid Gallon', image: '/images/Viper and Visibility Products/SKU 6-7070036.webp' },
+        ],
+      },
+      {
+        name: 'Air Filter & PCV Components',
+        imagePath: '/images/Air Filter & PCV Components',
+        products: [
+          { sku: 'SKU 5-11592885', name: 'Fram Extra Guard Air Filter', image: '/images/Air Filter & PCV Components/SKU 5-11592885.webp' },
+          { sku: 'SKU 5-22141637', name: 'STP Extended Life Filter', image: '/images/Air Filter & PCV Components/SKU 5-22141637.webp' },
+          { sku: 'SKU 5-50065817', name: 'Cabin Air Filter Combo', image: '/images/Air Filter & PCV Components/SKU 5-50065817.webp' },
+          { sku: 'SKU 5-50257773', name: 'PCV Valve Assembly', image: '/images/Air Filter & PCV Components/SKU 5-50257773.webp' },
+        ],
+      },
+    ],
+    segments: [
+      { name: 'DIY Price-Sensitive Buyers', why: 'Most responsive to clearance-level discounts; high sell-through velocity on overstock SKUs' },
+      { name: 'High-Intent Repair Buyers', why: 'Urgent repair needs (brakes, batteries) drive immediate conversion without heavy discounting' },
+    ],
+    outcome: 'Rapid inventory reduction + improved cash flow + higher conversion',
+  },
+  {
+    id: 'accelerate-revenue',
+    icon: TrendingUp,
+    iconGradient: 'from-blue-500 to-indigo-600',
+    iconBg: 'bg-blue-500/10',
+    label: 'Accelerate Core Category Revenue Growth',
+    subtitle: '2 Categories — Oil Kits, Air Filters',
+    locked: false,
+    campaignLabel: 'Core Revenue Growth',
+    goal: 'Drive consistent top-line growth through Oil Change & Filter Kits and Air Filter & PCV Components by expanding repeat purchase cycles and maintenance bundling',
+    client: 'autoparts' as const,
+    interpretation: {
+      summary: 'Alan has identified **strong revenue expansion potential** in high-frequency maintenance categories. To drive consistent top-line growth, I will focus on **Oil Change & Filter Kits** and **Air Filter & PCV Components** — the two highest-repeat categories.',
+      bullets: [
+        'Increase repeat purchase cycles across maintenance categories',
+        'Expand basket size through maintenance bundling (oil + filter kits)',
+        'Capture both DIY and PRO maintenance demand',
+      ],
+      context: {
+        campaignType: 'Core Revenue Growth Campaign',
+        primaryIntent: 'Revenue Growth + Repeat Purchase',
+        channel: 'Online + In-Store',
+        productFocus: 'Oil Change & Filter Kits · Air Filter & PCV',
+        discountStrategy: 'Low to Moderate (10–20%)',
+        constraints: ['Protect premium brand margins', 'Bundle oil + filter kits for AOV lift'],
+      },
+    },
+    categories: [
+      {
+        name: 'Oil Change & Filter Kits',
+        imagePath: '/images/Oil Change & Filter Kits',
+        products: [
+          { sku: 'SKU 10558155', name: 'Mobil 1 Full Synthetic 5W-30 Kit', image: '/images/Oil Change & Filter Kits/SKU 10558155.webp' },
+          { sku: 'SKU 10693169', name: 'Castrol EDGE 5W-30 Kit', image: '/images/Oil Change & Filter Kits/SKU 10693169.webp' },
+          { sku: 'SKU 106931690', name: 'Valvoline High Mileage Kit', image: '/images/Oil Change & Filter Kits/SKU 106931690.webp' },
+          { sku: 'SKU 50065372', name: 'Pennzoil Platinum 5W-30 Kit', image: '/images/Oil Change & Filter Kits/SKU 50065372.webp' },
+        ],
+      },
+      {
+        name: 'Air Filter & PCV Components',
+        imagePath: '/images/Air Filter & PCV Components',
+        products: [
+          { sku: 'SKU 5-11592885', name: 'Fram Extra Guard Air Filter', image: '/images/Air Filter & PCV Components/SKU 5-11592885.webp' },
+          { sku: 'SKU 5-22141637', name: 'STP Extended Life Filter', image: '/images/Air Filter & PCV Components/SKU 5-22141637.webp' },
+          { sku: 'SKU 5-50065817', name: 'Cabin Air Filter Combo', image: '/images/Air Filter & PCV Components/SKU 5-50065817.webp' },
+          { sku: 'SKU 5-50257773', name: 'PCV Valve Assembly', image: '/images/Air Filter & PCV Components/SKU 5-50257773.webp' },
+        ],
+      },
+    ],
+    segments: [
+      { name: 'DIY Routine Maintenance Buyers', why: 'High-frequency repeat buyers (3–6 month oil change cycle); oil + filter bundles drive predictable revenue' },
+      { name: 'PRO Fleet Operators', why: 'Volume orders on oil cases create stable B2B revenue stream with contract potential' },
+    ],
+    outcome: 'Sustained revenue growth + increased AOV + stronger repeat behavior',
+  },
+  {
+    id: 'protect-margins',
+    icon: Shield,
+    iconGradient: 'from-emerald-500 to-green-600',
+    iconBg: 'bg-emerald-500/10',
+    label: 'Protect Margins & Reduce Discount Dependency',
+    subtitle: '1 Category — Bulk Maintenance (High Value)',
+    locked: false,
+    campaignLabel: 'Margin Protection — Bulk Program',
+    goal: 'Improve profitability by shifting PRO and premium DIY buyers to volume-based bulk purchasing instead of blanket discounting on Bulk Maintenance Components',
+    client: 'autoparts' as const,
+    interpretation: {
+      summary: 'Alan has identified **margin pressure driven by excessive discounting** in high-volume categories. To improve profitability, I will shift focus to **Bulk Maintenance Components** — a high-margin, volume-driven category that rewards bulk behavior over blanket discounts.',
+      bullets: [
+        'Prioritize bulk purchasing behavior from PRO customers',
+        'Reduce reliance on blanket discounting',
+        'Drive value through volume pricing instead of margin erosion',
+      ],
+      context: {
+        campaignType: 'Margin Protection — Bulk Program',
+        primaryIntent: 'Margin Expansion + PRO Engagement',
+        channel: 'Direct Sales + Email + In-Store',
+        productFocus: 'Bulk Maintenance Components',
+        discountStrategy: 'Volume-based (5–15% on bulk orders only)',
+        constraints: ['No blanket discounting', 'Fleet & Emergency Parts injected for PRO urgency signals'],
+      },
+    },
+    categories: [
+      {
+        name: 'Bulk Maintenance Components',
+        imagePath: '/images/Fleet & Emergency Part',
+        products: [
+          { sku: 'SKU 4-11089445', name: 'Bulk Brake Pad Set (Case of 12)', image: '/images/Fleet & Emergency Part/SKU 4-11089445.webp' },
+          { sku: 'SKU 4-12071147', name: 'Fleet Oil Filter Multi-Pack', image: '/images/Fleet & Emergency Part/SKU 4-12071147.webp' },
+          { sku: 'SKU 4-12430241', name: 'PRO Wiper Blade Assortment', image: '/images/Fleet & Emergency Part/SKU 4-12430241.webp' },
+          { sku: 'SKU 4-50175300', name: 'Emergency Battery Kit (Bulk)', image: '/images/Fleet & Emergency Part/SKU 4-50175300.webp' },
+        ],
+      },
+    ],
+    segments: [
+      { name: 'PRO Fleet Buyers', why: 'Bulk purchasing behavior from fleet operators drives volume-based margins without blanket discounting' },
+      { name: 'Premium DIY Buyers', why: 'Brand-loyal customers who value quality over price; respond to value packs better than coupons' },
+    ],
+    outcome: 'Margin expansion + higher profitability per order + stronger PRO engagement',
+  },
+  // ── 5 LOCKED GOALS (coming soon) ──
+  {
+    id: 'increase-basket',
+    icon: Package,
+    iconGradient: 'from-slate-400 to-slate-500',
+    iconBg: 'bg-slate-100',
+    label: 'Increase Basket Size',
+    subtitle: 'Cross-sell & bundle strategies',
+    locked: true,
+    lockTooltip: 'Available in next release',
+  },
+  {
+    id: 'improve-conversion',
+    icon: Zap,
+    iconGradient: 'from-slate-400 to-slate-500',
+    iconBg: 'bg-slate-100',
+    label: 'Improve Conversion',
+    subtitle: 'Cart abandonment & retargeting',
+    locked: true,
+    lockTooltip: 'Available in next release',
+  },
+  {
+    id: 'retain-customers',
+    icon: Users,
+    iconGradient: 'from-slate-400 to-slate-500',
+    iconBg: 'bg-slate-100',
+    label: 'Retain Customers',
+    subtitle: 'Loyalty & lifecycle campaigns',
+    locked: true,
+    lockTooltip: 'Available in next release',
+  },
+  {
+    id: 'win-back',
+    icon: RefreshCw,
+    iconGradient: 'from-slate-400 to-slate-500',
+    iconBg: 'bg-slate-100',
+    label: 'Win Back',
+    subtitle: 'Lapsed customer re-engagement',
+    locked: true,
+    lockTooltip: 'Available in next release',
+  },
+  {
+    id: 'seasonal-demand',
+    icon: Calendar,
+    iconGradient: 'from-slate-400 to-slate-500',
+    iconBg: 'bg-slate-100',
+    label: 'Seasonal Demand',
+    subtitle: 'Weather & holiday driven campaigns',
+    locked: true,
+    lockTooltip: 'Available in next release',
+  },
+]
+
 interface AgentState {
-  phase: 'idle' | 'interpreting' | 'hypothesizing' | 'clarifying' | 'ready'
+  phase: 'idle' | 'goal-selected' | 'interpreting' | 'hypothesizing' | 'clarifying' | 'ready'
   goalReceived: boolean
   hypotheses: { label: string; value: string; confidence: ConfidenceLevel }[]
   assumptions: AssumptionToken[]
@@ -2079,7 +2312,9 @@ function ContextInputStep({
   })
   const [isPaused, setIsPaused] = useState(false)
   const [editingAssumption, setEditingAssumption] = useState<string | null>(null)
-  const [isExamplesExpanded, setIsExamplesExpanded] = useState(false)
+  const [selectedBusinessGoal, setSelectedBusinessGoal] = useState<typeof BUSINESS_GOAL_PLAYBOOKS[number] | null>(null)
+  const [isInterpretationDone, setIsInterpretationDone] = useState(false)
+  const [showInterpretation, setShowInterpretation] = useState(false)
 
   const canSubmit = campaign.goal && campaign.goal.trim().length > 10
 
@@ -2156,66 +2391,68 @@ function ContextInputStep({
   }
 
   // Generate assumptions from hypotheses
-  const generateAssumptions = (hypotheses: { label: string; value: string; confidence: ConfidenceLevel }[], client?: 'sally' | 'michaels' | 'tsc', _goal?: string) => {
+  const generateAssumptions = (hypotheses: { label: string; value: string; confidence: ConfidenceLevel }[], _client?: 'autoparts', _goal?: string) => {
     const assumptions: AssumptionToken[] = []
     
-    // Channel assumption
+    // Channel assumption — Auto Parts: DIY Online-first, PRO Omni
     const channelHypo = hypotheses.find(h => h.label === 'Likely channel')
+    const isPROGoal = hypotheses.some(h => h.label === 'Primary intent' && (h.value.includes('PRO') || h.value.includes('fleet') || h.value.includes('shop')))
     if (channelHypo && channelHypo.confidence !== 'high') {
       assumptions.push({
         id: 'channel',
         key: 'Channel',
-        value: client === 'michaels' || client === 'tsc' ? 'Online + In-Store' : 'Online',
+        value: isPROGoal ? 'Omni (PRO Store Priority)' : 'Online-first (DIY)',
         source: 'assumed',
         confidence: 'medium',
-        reason: 'No channel explicitly specified in goal',
+        reason: isPROGoal ? 'PRO customers prefer store pickup and bulk ordering' : 'DIY customers prefer online ordering with pickup option',
         editable: true
       })
     }
     
-    // Discount flexibility
+    // Discount strategy — tiered by intent
     const hasMarginConstraint = hypotheses.some(h => h.label === 'Constraint' && h.value.includes('Margin'))
     const isClearance = hypotheses.some(h => h.label === 'Primary intent' && h.value.includes('clearance'))
+    const isRepairIntent = hypotheses.some(h => h.label === 'Primary intent' && (h.value.includes('repair') || h.value.includes('emergency')))
     assumptions.push({
       id: 'discount',
-      key: 'Discount Flexibility',
-      value: client === 'michaels' || client === 'tsc' ? 'Up to 60% off' : hasMarginConstraint ? 'Conservative' : isClearance ? 'Moderate' : 'Flexible',
+      key: 'Discount Strategy',
+      value: isClearance ? 'Clearance: 40%+' : isRepairIntent ? 'Competitive: 20-35%' : hasMarginConstraint ? 'Conservative: 10-15%' : 'Maintenance: 10-20%',
       source: 'inferred',
-      confidence: client === 'michaels' || client === 'tsc' ? 'high' : hasMarginConstraint ? 'high' : 'medium',
-      reason: client === 'michaels' 
-        ? 'Michaels holiday sale with 60% off promotions'
-        : client === 'tsc'
-        ? 'TSC holiday sale with 60% off promotions'
-        : hasMarginConstraint 
-          ? 'Margin protection mentioned in goal'
-          : 'No explicit discount constraints provided',
+      confidence: hasMarginConstraint ? 'high' : 'medium',
+      reason: isClearance 
+        ? 'Clearance intent detected — deep discounts on overstock'
+        : isRepairIntent 
+          ? 'Repair urgency supports competitive pricing'
+          : hasMarginConstraint 
+            ? 'Margin protection mentioned in goal'
+            : 'Standard maintenance discount tier applied',
       editable: true
     })
     
-    // Product scope - derive category based on client
-    let productScope = 'Full category'
-    let scopeConfidence: ConfidenceLevel = 'low'
-    let scopeReason = 'No specific sub-categories mentioned'
-    
-    if (client === 'michaels') {
-      // Michaels campaigns include both categories
-      productScope = 'Christmas Trees & Decor Collections'
-      scopeReason = 'Michaels holiday campaign - both product categories included'
-      scopeConfidence = 'high'
-    } else if (client === 'tsc') {
-      // TSC campaigns include both categories
-      productScope = 'Home Decor & Christmas Decor'
-      scopeReason = 'TSC holiday campaign - both product categories included'
-      scopeConfidence = 'high'
-    }
+    // Product scope — category-driven with fitment
+    const categoryHypo = hypotheses.find(h => h.label === 'Category focus')
+    let productScope = categoryHypo ? `${categoryHypo.value} — Fitment validated` : 'Full category — Fitment validated'
+    let scopeConfidence: ConfidenceLevel = categoryHypo ? 'high' : 'low'
+    let scopeReason = categoryHypo ? `Category detected: ${categoryHypo.value}` : 'No specific category mentioned — will include all auto parts categories'
     
     assumptions.push({
       id: 'scope',
       key: 'Product Scope',
       value: productScope,
-      source: client === 'michaels' || client === 'tsc' ? 'confirmed' : 'assumed',
+      source: categoryHypo ? 'confirmed' : 'assumed',
       confidence: scopeConfidence,
       reason: scopeReason,
+      editable: true
+    })
+
+    // Vehicle fitment assumption
+    assumptions.push({
+      id: 'fitment',
+      key: 'Vehicle Fitment',
+      value: 'Include only compatible SKUs',
+      source: 'assumed',
+      confidence: 'high',
+      reason: 'All auto parts campaigns require vehicle fitment validation',
       editable: true
     })
     
@@ -2249,6 +2486,13 @@ function ContextInputStep({
     return clarifications
   }
 
+  // Handle business goal selection (skip locked goals)
+  const handleSelectBusinessGoal = (goalPlaybook: typeof BUSINESS_GOAL_PLAYBOOKS[number]) => {
+    if (goalPlaybook.locked) return
+    setSelectedBusinessGoal(goalPlaybook)
+    onUpdate({ goal: goalPlaybook.goal!, client: goalPlaybook.client!, selectedGoalId: goalPlaybook.id })
+  }
+
   // Handle goal submission - starts the reasoning canvas
   const handleSubmitGoal = async () => {
     if (isPaused) return
@@ -2256,6 +2500,17 @@ function ContextInputStep({
     // Generate and set proper campaign name
     const campaignName = generateCampaignName(campaign.goal)
     onUpdate({ name: campaignName })
+
+    // If we have a business goal selected, show interpretation first
+    if (selectedBusinessGoal) {
+      setAgentState(prev => ({ ...prev, phase: 'goal-selected', goalReceived: true }))
+      setShowInterpretation(true)
+      // Animate interpretation appearing
+      await new Promise(resolve => setTimeout(resolve, 800))
+      setIsInterpretationDone(true)
+      // Wait for user to review interpretation before proceeding
+      return
+    }
     
     // Phase 1: Interpreting
     setAgentState(prev => ({ ...prev, phase: 'interpreting', goalReceived: true }))
@@ -2286,6 +2541,24 @@ function ContextInputStep({
         ? 'I can proceed with assumptions, or you can clarify now'
         : 'Ready to build customer segments'
     }))
+  }
+
+  // Handle continue after interpretation review — for playbook goals, skip hypothesis/assumption flow entirely
+  const handleContinueAfterInterpretation = async () => {
+    if (isPaused) return
+
+    // Playbook goals already have deterministic context — skip hypothesis/assumption/clarification
+    // Go straight to ready and auto-authorize
+    setAgentState(prev => ({
+      ...prev,
+      phase: 'ready',
+      nextAction: 'Ready to build customer segments'
+    }))
+
+    // Brief pause for UI feedback, then auto-authorize
+    await new Promise(resolve => setTimeout(resolve, 600))
+    if (isPaused) return
+    onSubmit()
   }
 
   // Handle proceeding with assumptions
@@ -2339,6 +2612,9 @@ function ContextInputStep({
       nextAction: ''
     })
     setIsPaused(false)
+    setSelectedBusinessGoal(null)
+    setIsInterpretationDone(false)
+    setShowInterpretation(false)
   }
 
   // Confidence badge color
@@ -2416,8 +2692,9 @@ function ContextInputStep({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
+              {/* Header */}
               <motion.div 
-                className="flex items-center gap-4 mb-6"
+                className="flex items-center gap-4 mb-8"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
@@ -2433,125 +2710,162 @@ function ContextInputStep({
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <Sparkles className="w-6 h-6 text-white" />
+                    <Target className="w-6 h-6 text-white" />
                   </motion.div>
                 </motion.div>
                 <div>
-                  <h2 className="text-xl font-bold text-text-primary">What would you like to achieve?</h2>
-                  <p className="text-sm text-text-secondary">Describe your campaign goal in your own words</p>
+                  <h2 className="text-xl font-bold text-text-primary">What do you want to achieve?</h2>
+                  <p className="text-sm text-text-secondary">Select a business goal to get started</p>
                 </div>
               </motion.div>
-              
+
+              {/* Actionable Business Goals (single-select) */}
               <motion.div
+                className="space-y-3 mb-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.4 }}
               >
-                <textarea
-                  value={campaign.goal}
-                  onChange={(e) => onUpdate({ goal: e.target.value })}
-                  placeholder="e.g., Clear Kids Apparel overstock online across the US while protecting margin..."
-                  className="w-full px-4 py-3 bg-white/80 backdrop-blur border border-primary/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none h-28 transition-all"
-                />
+                {BUSINESS_GOAL_PLAYBOOKS.filter(g => !g.locked).map((goalPlaybook, i) => {
+                  const GoalIcon = goalPlaybook.icon
+                  const isSelected = selectedBusinessGoal?.id === goalPlaybook.id
+                  return (
+                  <motion.button
+                    key={goalPlaybook.id}
+                    initial={{ opacity: 0, x: -15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 + i * 0.08, duration: 0.35 }}
+                    onClick={() => handleSelectBusinessGoal(goalPlaybook)}
+                    className={cn(
+                      "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all group",
+                      isSelected
+                        ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                        : "border-border hover:border-primary/40 hover:bg-primary/[0.02]"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all",
+                      isSelected
+                        ? `bg-gradient-to-br ${goalPlaybook.iconGradient} shadow-lg`
+                        : goalPlaybook.iconBg
+                    )}>
+                      <GoalIcon className={cn(
+                        "w-5 h-5 transition-colors",
+                        isSelected ? "text-white" : "text-slate-600"
+                      )} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn(
+                        "text-sm font-semibold mb-0.5 transition-colors",
+                        isSelected ? "text-primary" : "text-text-primary group-hover:text-primary"
+                      )}>
+                        {goalPlaybook.label}
+                      </p>
+                      <p className="text-xs text-text-muted">{goalPlaybook.subtitle}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {isSelected && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+                        >
+                          <Check className="w-3 h-3 text-white" />
+                        </motion.div>
+                      )}
+                      <ArrowRight className={cn(
+                        "w-4 h-4 transition-all",
+                        isSelected
+                          ? "text-primary opacity-100"
+                          : "text-text-muted opacity-0 group-hover:opacity-100"
+                      )} />
+                    </div>
+                  </motion.button>
+                  )
+                })}
               </motion.div>
-              
-              <motion.div 
-                className="mt-4"
+
+              {/* Divider */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px bg-border" />
+              </div>
+
+              {/* Locked Goals */}
+              <motion.div
+                className="space-y-2 mb-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
               >
-                {/* Expandable Examples Section */}
-                <button
-                  onClick={() => setIsExamplesExpanded(!isExamplesExpanded)}
-                  className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary transition-colors mb-3"
+                {BUSINESS_GOAL_PLAYBOOKS.filter(g => g.locked).map((goalPlaybook) => {
+                  const GoalIcon = goalPlaybook.icon
+                  return (
+                    <div
+                      key={goalPlaybook.id}
+                      className="flex items-center gap-4 p-3 rounded-xl border border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed"
+                      title={goalPlaybook.lockTooltip || 'Available in next release'}
+                    >
+                      <div className="w-5 h-5 rounded border-2 border-slate-200 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-3 h-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      </div>
+                      <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0", goalPlaybook.iconBg)}>
+                        <GoalIcon className="w-4 h-4 text-slate-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-400">{goalPlaybook.label}</p>
+                        <p className="text-xs text-slate-300">{goalPlaybook.subtitle}</p>
+                      </div>
+                      <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Coming Soon</span>
+                    </div>
+                  )
+                })}
+              </motion.div>
+
+              {/* Selected Goal Preview */}
+              <AnimatePresence>
+                {selectedBusinessGoal && selectedBusinessGoal.campaignLabel && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mb-4 p-4 bg-primary/5 border border-primary/15 rounded-xl">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                          Mapped Campaign → {selectedBusinessGoal.campaignLabel}
+                        </span>
+                      </div>
+                      <p className="text-sm text-text-secondary">{selectedBusinessGoal.goal}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              {/* Submit Button */}
+              <motion.div 
+                className="flex justify-end mt-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.3 }}
+              >
+                <Button
+                  variant="primary"
+                  onClick={handleSubmitGoal}
+                  disabled={!canSubmit}
+                  size="sm"
+                  className="gap-2 shadow-lg shadow-primary/25"
                 >
                   <motion.div
-                    animate={{ rotate: isExamplesExpanded ? 90 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    animate={canSubmit ? { scale: [1, 1.1, 1] } : {}}
+                    transition={{ duration: 1.5, repeat: Infinity }}
                   >
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <Sparkles className="w-4 h-4" />
                   </motion.div>
-                  <span className="uppercase tracking-wide font-medium">Try an example</span>
-                  <motion.span 
-                    className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded-full"
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    5 templates
-                  </motion.span>
-                </button>
-                
-                <AnimatePresence>
-                  {isExamplesExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                      <div className="flex flex-col gap-2 pb-4">
-                        {[
-                          { goal: 'Drive repeat purchases from VIP customers online while avoiding heavy discounts', icon: '👑', label: 'VIP Retention', client: 'sally' },
-                          { goal: 'Clear excess Kids Apparel inventory online across the US while protecting margins', icon: '📦', label: 'Inventory Clearance', client: 'sally' },
-                          { goal: 'Increase full-price sell-through of new Women\'s Footwear styles online in North America', icon: '👠', label: 'Full-Price Push', client: 'sally' },
-                          { goal: 'Drive Christmas Trees and Decor sales with 60% off holiday promotions to maximize seasonal revenue', icon: '🎄', label: 'Michaels Holiday Sale', client: 'michaels' },
-                          { goal: 'Drive Home Decor and Christmas Decor sales with 60% off holiday promotions targeting farmhouse lovers and seasonal shoppers', icon: '🏡', label: 'TSC Holiday Sale', client: 'tsc' }
-                        ].map((example, i) => (
-                          <motion.button
-                            key={i}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.1, duration: 0.3 }}
-                            onClick={() => {
-                              onUpdate({ goal: example.goal, client: example.client as 'sally' | 'michaels' | 'tsc' })
-                              setIsExamplesExpanded(false)
-                            }}
-                            className={cn(
-                              "flex items-start gap-3 p-3 bg-surface rounded-xl border text-left transition-all group",
-                              example.client === 'michaels' 
-                                ? "border-green-200 hover:border-green-400 hover:bg-green-50" 
-                                : example.client === 'tsc'
-                                ? "border-amber-200 hover:border-amber-400 hover:bg-amber-50"
-                                : "border-border hover:border-primary/30 hover:bg-primary/5"
-                            )}
-                          >
-                            <span className="text-lg">{example.icon}</span>
-                            <div className="flex-1">
-                              <p className="text-xs font-medium text-primary mb-1">{example.label}</p>
-                              <p className="text-xs text-text-secondary group-hover:text-text-primary transition-colors">{example.goal}</p>
-                            </div>
-                            <ArrowRight className="w-4 h-4 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity mt-1" />
-                          </motion.button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                
-                <motion.div 
-                  className="flex justify-end"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.3 }}
-                >
-                  <Button
-                    variant="primary"
-                    onClick={handleSubmitGoal}
-                    disabled={!canSubmit}
-                    size="sm"
-                    className="gap-2 shadow-lg shadow-primary/25"
-                  >
-                    <motion.div
-                      animate={canSubmit ? { scale: [1, 1.1, 1] } : {}}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <Sparkles className="w-4 h-4" />
-                    </motion.div>
-                    Submit to Alan
-                  </Button>
-                </motion.div>
+                  Submit to Alan
+                </Button>
               </motion.div>
             </motion.div>
           ) : (
@@ -2570,8 +2884,172 @@ function ContextInputStep({
           )}
         </motion.div>
 
+        {/* Alan's Interpretation Card — shows when business goal selected */}
+        <AnimatePresence>
+          {showInterpretation && selectedBusinessGoal && selectedBusinessGoal.interpretation && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+              className="bg-gradient-to-br from-agent/5 via-primary/5 to-agent/10 border border-agent/20 rounded-2xl overflow-hidden"
+            >
+              {/* Header — Alan's Story */}
+              <div className="px-6 pt-6 pb-4 flex items-start gap-4">
+                <motion.div
+                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-agent to-primary flex items-center justify-center shadow-lg shadow-agent/25 flex-shrink-0"
+                  animate={{ boxShadow: ['0 8px 20px -4px rgba(139, 92, 246, 0.25)', '0 8px 30px -4px rgba(139, 92, 246, 0.4)', '0 8px 20px -4px rgba(139, 92, 246, 0.25)'] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <Sparkles className="w-5 h-5 text-white" />
+                </motion.div>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-agent uppercase tracking-wider mb-1">Alan's Strategy</p>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    className="text-sm text-text-primary leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: selectedBusinessGoal.interpretation.summary
+                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>')
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* This campaign will: */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isInterpretationDone ? 1 : 0 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+                className="px-6 pb-4"
+              >
+                <p className="text-xs font-medium text-text-muted mb-2.5">This campaign will:</p>
+                <div className="space-y-2">
+                  {selectedBusinessGoal.interpretation.bullets.map((bullet, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: isInterpretationDone ? 1 : 0, x: isInterpretationDone ? 0 : -10 }}
+                      transition={{ delay: 0.3 + i * 0.15, duration: 0.3 }}
+                      className="flex items-center gap-2.5"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-agent flex-shrink-0" />
+                      <span className="text-sm text-text-secondary">{bullet}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Context Grid */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: isInterpretationDone ? 1 : 0, y: isInterpretationDone ? 0 : 10 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+                className="mx-6 mb-4 bg-white/70 backdrop-blur border border-slate-200/80 rounded-xl p-5"
+              >
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5" />
+                  Context from Goal
+                </p>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                  {[
+                    { label: 'Campaign Type', value: selectedBusinessGoal.interpretation.context.campaignType },
+                    { label: 'Primary Intent', value: selectedBusinessGoal.interpretation.context.primaryIntent },
+                    { label: 'Channel', value: selectedBusinessGoal.interpretation.context.channel },
+                    { label: 'Product Focus', value: selectedBusinessGoal.interpretation.context.productFocus },
+                    { label: 'Discount Strategy', value: selectedBusinessGoal.interpretation.context.discountStrategy },
+                  ].map((item, i) => (
+                    <div key={i}>
+                      <p className="text-[11px] text-text-muted font-medium mb-0.5">{item.label}</p>
+                      <p className="text-sm font-medium text-text-primary">{item.value}</p>
+                    </div>
+                  ))}
+                  <div className="col-span-2">
+                    <p className="text-[11px] text-text-muted font-medium mb-1">Constraints</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedBusinessGoal.interpretation.context.constraints.map((c, i) => (
+                        <span key={i} className="text-xs px-2.5 py-1 bg-warning/10 text-warning border border-warning/20 rounded-full">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Categories (names only — products & segments come in their own flow steps) */}
+              {isInterpretationDone && selectedBusinessGoal.categories && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  className="mx-6 mb-4"
+                >
+                  <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Package className="w-3.5 h-3.5" />
+                    Focus Categories
+                  </p>
+                  <div className="space-y-2">
+                    {selectedBusinessGoal.categories.map((cat, ci) => (
+                      <motion.div
+                        key={ci}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 + ci * 0.15 }}
+                        className="flex items-center gap-3 px-4 py-3 bg-white/70 backdrop-blur border border-slate-200/80 rounded-xl"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                        <p className="text-sm font-medium text-text-primary">{cat.name}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Outcome */}
+              {isInterpretationDone && selectedBusinessGoal.outcome && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  className="mx-6 mb-6 p-4 bg-success/5 border border-success/15 rounded-xl"
+                >
+                  <p className="text-xs font-semibold text-success uppercase tracking-wider mb-1 flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    Expected Outcome
+                  </p>
+                  <p className="text-sm font-medium text-success">{selectedBusinessGoal.outcome}</p>
+                </motion.div>
+              )}
+
+              {/* Continue Button */}
+              {isInterpretationDone && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                  className="px-6 pb-6 flex justify-end"
+                >
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleContinueAfterInterpretation}
+                    className="gap-2 shadow-lg shadow-primary/25"
+                  >
+                    <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                      <Sparkles className="w-4 h-4" />
+                    </motion.div>
+                    Continue — Build Campaign
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Agent Intent Statement */}
-        {agentState.phase !== 'idle' && (
+        {agentState.phase !== 'idle' && agentState.phase !== 'goal-selected' && (
           <div className="bg-agent/5 border border-agent/20 rounded-xl p-4">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-agent/10 flex items-center justify-center flex-shrink-0">
@@ -3045,7 +3523,7 @@ function ContextDecisionStep({
             <Edit3 className="w-4 h-4 mr-2" /> Adjust Inputs
           </Button>
           <Button variant="primary" onClick={onConfirm} disabled={isWorking}>
-            <Check className="w-4 h-4 mr-2" /> Confirm & Lock Context
+            <Check className="w-4 h-4 mr-2" /> Confirm & Continue
           </Button>
         </div>
       </div>
@@ -3066,12 +3544,14 @@ const SEGMENT_LIBRARY = [
 function AudienceStep({
   campaign,
   onConfirm,
+  onGoBack,
   onUpdateStrategy,
   onSaveDraft,
   isWorking
 }: {
   campaign: Campaign
   onConfirm: () => void
+  onGoBack: () => void
   onUpdateStrategy: (strategy: Campaign['audienceStrategy']) => void
   onSaveDraft: () => void
   isWorking: boolean
@@ -3194,7 +3674,7 @@ function AudienceStep({
               <div>
                 <p className="font-semibold text-agent">Alan has designed your audience strategy</p>
                 <p className="text-sm text-text-secondary">
-                  MECE segmentation with {strategy.totalCoverage}% coverage
+                  MECE segmentation with {Math.round(strategy.totalCoverage * 10) / 10}% coverage
                 </p>
               </div>
             </div>
@@ -3304,7 +3784,7 @@ function AudienceStep({
                 {strategy.segments.reduce((a, s) => a + s.size, 0).toLocaleString()} customers
               </p>
             </div>
-            <p className="text-2xl font-bold text-success">{strategy.totalCoverage}%</p>
+            <p className="text-2xl font-bold text-success">{Math.round(strategy.totalCoverage * 10) / 10}%</p>
           </div>
         </div>
 
@@ -3365,9 +3845,14 @@ function AudienceStep({
 
         {/* Footer */}
         <div className="px-6 py-4 bg-surface-secondary border-t border-border flex items-center justify-between">
-          <Button variant="ghost" onClick={onSaveDraft}>
-            <Save className="w-4 h-4 mr-2" /> Save Draft
-          </Button>
+          <div className="flex items-center gap-2">
+            <button onClick={onGoBack} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10 transition-all duration-200">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+            <Button variant="ghost" onClick={onSaveDraft}>
+              <Save className="w-4 h-4 mr-2" /> Save Draft
+            </Button>
+          </div>
           <Button variant="primary" onClick={onConfirm} disabled={isWorking || isAdjusting}>
             <Check className="w-4 h-4 mr-2" /> Confirm Segment Strategy
           </Button>
@@ -3380,12 +3865,14 @@ function AudienceStep({
 function OfferStep({
   campaign,
   onConfirm,
+  onGoBack,
   onSkipPromo,
   onSaveDraft,
   isWorking
 }: {
   campaign: Campaign
   onConfirm: () => void
+  onGoBack: () => void
   onSkipPromo: () => void
   onSaveDraft: () => void
   isWorking: boolean
@@ -3570,9 +4057,14 @@ function OfferStep({
 
         {/* Footer */}
         <div className="px-6 py-4 bg-surface-secondary border-t border-border flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={onSaveDraft}>
-            <Save className="w-4 h-4 mr-2" /> Save Draft
-          </Button>
+          <div className="flex items-center gap-2">
+            <button onClick={onGoBack} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10 transition-all duration-200">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+            <Button variant="ghost" size="sm" onClick={onSaveDraft}>
+              <Save className="w-4 h-4 mr-2" /> Save Draft
+            </Button>
+          </div>
           <Button 
             variant="primary" 
             onClick={allSkipped ? onSkipPromo : onConfirm} 
@@ -3594,11 +4086,13 @@ function OfferStep({
 function ProductStep({
   campaign,
   onConfirm,
+  onGoBack,
   onSaveDraft,
   isWorking
 }: {
   campaign: Campaign
   onConfirm: () => void
+  onGoBack: () => void
   onSaveDraft: () => void
   isWorking: boolean
 }) {
@@ -3609,9 +4103,10 @@ function ProductStep({
   const [isReanalyzing, setIsReanalyzing] = useState(false)
   const [adjustmentApplied, setAdjustmentApplied] = useState<string | null>(null)
   
-  // Base product groups data - sourced from centralized Products JSON (Sally or Michaels based on client)
+  // Base product groups data - dynamically built from detected categories
   const segmentNames = segments.map(s => s.name)
-  const baseProductGroups = getProductGroupsByClient(campaign.client || 'sally', segmentNames)
+  const detectedCats = campaign.detectedCategories || campaign.derivedContext?.detectedCategories
+  const baseProductGroups = getProductGroupsByClient(campaign.client || 'autoparts', segmentNames, detectedCats)
 
   // Dynamic product groups state
   const [productGroups, setProductGroups] = useState(
@@ -3845,7 +4340,10 @@ function ProductStep({
 
         {/* Footer */}
         <div className="px-6 py-4 bg-surface-secondary border-t border-border flex items-center justify-between">
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <button onClick={onGoBack} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10 transition-all duration-200">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
             <Button variant="ghost" onClick={onSaveDraft}>
               <Save className="w-4 h-4 mr-2" /> Save Draft
             </Button>
@@ -3944,6 +4442,7 @@ function CreativeStep({
   onApprove,
   onRegenerate,
   onConfirm,
+  onGoBack,
   onSaveDraft,
   isWorking
 }: {
@@ -3951,6 +4450,7 @@ function CreativeStep({
   onApprove: (id: string) => void
   onRegenerate: (id: string) => void
   onConfirm: () => void
+  onGoBack: () => void
   onSaveDraft: () => void
   isWorking: boolean
 }) {
@@ -4128,6 +4628,9 @@ function CreativeStep({
         {/* Footer */}
         <div className="px-6 py-4 bg-surface-secondary border-t border-border flex items-center justify-between">
           <div className="flex items-center gap-4">
+            <button onClick={onGoBack} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10 transition-all duration-200">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
             <Button variant="ghost" size="sm" onClick={onSaveDraft}>
               <Save className="w-4 h-4 mr-2" /> Save Draft
             </Button>
@@ -4144,13 +4647,13 @@ function CreativeStep({
   )
 }
 
-function ReviewStep({ campaign, onSaveDraft, onLaunch }: { campaign: Campaign; onSaveDraft: () => void; onLaunch: () => void }) {
-  const checks = [
-    { label: 'Context', locked: campaign.lockedSteps.includes('context') },
-    { label: 'Segment', locked: campaign.lockedSteps.includes('segment') },
-    { label: 'Product', locked: campaign.lockedSteps.includes('product') },
-    { label: 'Promo', locked: campaign.lockedSteps.includes('promo') },
-    { label: 'Creative', locked: campaign.lockedSteps.includes('creative') },
+function ReviewStep({ campaign, onGoBack, onGoToStep, onSaveDraft, onLaunch }: { campaign: Campaign; onGoBack: () => void; onGoToStep: (step: CampaignStep) => void; onSaveDraft: () => void; onLaunch: () => void }) {
+  const checks: { label: string; step: CampaignStep; completed: boolean }[] = [
+    { label: 'Context', step: 'context', completed: campaign.lockedSteps.includes('context') },
+    { label: 'Segments', step: 'segment', completed: campaign.lockedSteps.includes('segment') },
+    { label: 'Products', step: 'product', completed: campaign.lockedSteps.includes('product') },
+    { label: 'Promos', step: 'promo', completed: campaign.lockedSteps.includes('promo') },
+    { label: 'Creative', step: 'creative', completed: campaign.lockedSteps.includes('creative') },
   ]
 
   return (
@@ -4168,7 +4671,7 @@ function ReviewStep({ campaign, onSaveDraft, onLaunch }: { campaign: Campaign; o
             </div>
             <div>
               <p className="font-semibold text-success">Alan has validated this campaign</p>
-              <p className="text-sm text-text-secondary">All decisions are locked and ready for launch</p>
+              <p className="text-sm text-text-secondary">All steps confirmed — you can edit any step before launching</p>
             </div>
           </div>
         </div>
@@ -4197,21 +4700,28 @@ function ReviewStep({ campaign, onSaveDraft, onLaunch }: { campaign: Campaign; o
             </div>
           </div>
 
-          {/* Checklist */}
+          {/* Checklist — with Edit affordance */}
           <div className="p-4 bg-surface-secondary rounded-xl">
             <p className="font-medium text-text-primary mb-3">Validation Checklist</p>
             <div className="space-y-2">
               {checks.map(c => (
-                <div key={c.label} className="flex items-center gap-3">
-                  {c.locked ? (
+                <div key={c.label} className="flex items-center gap-3 group">
+                  {c.completed ? (
                     <CheckCircle className="w-5 h-5 text-success" />
                   ) : (
                     <div className="w-5 h-5 rounded-full border-2 border-border" />
                   )}
-                  <span className={cn('text-sm', c.locked ? 'text-text-primary' : 'text-text-muted')}>
+                  <span className={cn('text-sm flex-1', c.completed ? 'text-text-primary' : 'text-text-muted')}>
                     {c.label}
                   </span>
-                  {c.locked && <Lock className="w-3 h-3 text-text-muted" />}
+                  {c.completed && (
+                    <button
+                      onClick={() => onGoToStep(c.step)}
+                      className="flex items-center gap-1.5 text-xs text-primary/70 hover:text-primary font-medium opacity-0 group-hover:opacity-100 transition-all duration-200 px-2 py-1 rounded-md hover:bg-primary/10"
+                    >
+                      <Edit3 className="w-3 h-3" /> Edit
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -4219,8 +4729,13 @@ function ReviewStep({ campaign, onSaveDraft, onLaunch }: { campaign: Campaign; o
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-surface-secondary border-t border-border flex items-center justify-center gap-4">
-          <Button variant="ghost" className="px-8" onClick={onSaveDraft}>Save as Draft</Button>
+        <div className="px-6 py-4 bg-surface-secondary border-t border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button onClick={onGoBack} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10 transition-all duration-200">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+            <Button variant="ghost" className="px-6" onClick={onSaveDraft}>Save as Draft</Button>
+          </div>
           <Button variant="primary" className="px-8 bg-success hover:bg-success/90" onClick={onLaunch}>
             <Rocket className="w-4 h-4 mr-2" /> Approve & Launch
           </Button>
