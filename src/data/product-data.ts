@@ -291,6 +291,12 @@ const CATEGORY_GROUP_META: Record<string, { group: string; rationale: string; co
   'Exhaust and Emissions': { group: 'Exhaust & Emissions Parts',    rationale: 'Mufflers, catalytic converters, and emissions compliance parts', color: 'from-gray-500 to-slate-500' },
   'Steering and Suspension': { group: 'Steering & Suspension',      rationale: 'Struts, shocks, and steering components for ride quality', color: 'from-green-500 to-emerald-500' },
   'Lighting':              { group: 'Lighting & Bulbs',              rationale: 'Headlights, tail lights, and interior bulbs — safety and visibility', color: 'from-amber-500 to-yellow-500' },
+  // Playbook category name aliases
+  'Brake and Battery Essentials':  { group: 'Brake & Battery Essentials',   rationale: 'Failure-triggered and price-sensitive buyers — brake kits and emergency batteries', color: 'from-orange-500 to-amber-500' },
+  'Wiper and Visibility Products': { group: 'Wiper & Visibility Products',  rationale: 'Seasonal wiper replacements and washer fluid — weather-driven demand', color: 'from-sky-500 to-blue-500' },
+  'Air Filter & PCV Components':   { group: 'Air Filter & PCV Components', rationale: 'Regular filter replacements and PCV maintenance — high repurchase frequency', color: 'from-teal-500 to-emerald-500' },
+  'Oil Change & Filter Kits':      { group: 'Oil Change & Filter Kits',    rationale: 'High-frequency maintenance items with bundle upsell potential — oil + filter combos', color: 'from-blue-500 to-cyan-500' },
+  'Bulk Maintenance Components':   { group: 'Bulk Maintenance Components', rationale: 'Volume-based bulk purchasing for PRO and fleet operators — margin protection', color: 'from-purple-500 to-indigo-500' },
 }
 
 /**
@@ -307,6 +313,12 @@ const CATEGORY_NAME_TO_ID: Record<string, string> = {
   'Exhaust and Emissions': 'exhaust_and_emissions',
   'Steering and Suspension': 'steering_and_suspension',
   'Lighting': 'lighting',
+  // Playbook category name aliases
+  'Brake and Battery Essentials': 'braking',
+  'Wiper and Visibility Products': 'wipers_and_related',
+  'Air Filter & PCV Components': 'filters_and_pcv',
+  'Oil Change & Filter Kits': 'oil_and_lubricants',
+  'Bulk Maintenance Components': 'braking',
 }
 
 /**

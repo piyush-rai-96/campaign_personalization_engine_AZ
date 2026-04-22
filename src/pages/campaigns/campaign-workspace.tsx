@@ -699,25 +699,37 @@ const deriveAudienceStrategy = (category: string, _client?: 'autoparts', detecte
   }
 }
 
+// Goal-specific, segment-specific promo offers — each segment gets a distinct promo strategy
+const GOAL_PROMO_OFFERS: Record<string, { segmentName: string; productGroup: string; promotion: string; promoValue: string; expectedLift: number; marginImpact: number; overstockCoverage: number }[]> = {
+  'clear-inventory': [
+    { segmentName: 'DIY Price-Sensitive Buyers', productGroup: 'Brake & Battery Essentials', promotion: 'Clearance Blowout — Brake & Battery', promoValue: '30% OFF Select Overstock', expectedLift: 22, marginImpact: 3, overstockCoverage: 78 },
+    { segmentName: 'High-Intent Repair Buyers', productGroup: 'Wiper & Visibility Products', promotion: 'Seasonal Wiper Markdown', promoValue: 'Buy 1 Get 1 50% Off', expectedLift: 18, marginImpact: 5, overstockCoverage: 70 },
+    { segmentName: 'DIY Price-Sensitive Buyers', productGroup: 'Air Filter & PCV Components', promotion: 'Filter Clearance Bundle', promoValue: '25% OFF Filter Combos', expectedLift: 15, marginImpact: 4, overstockCoverage: 65 },
+  ],
+  'accelerate-revenue': [
+    { segmentName: 'DIY Routine Maintenance Buyers', productGroup: 'Oil Change & Filter Kits', promotion: 'Oil Change Bundle Save', promoValue: '15% OFF Kit + Free Filter', expectedLift: 16, marginImpact: 7, overstockCoverage: 55 },
+    { segmentName: 'PRO Fleet Operators', productGroup: 'Air Filter & PCV Components', promotion: 'PRO Volume Filter Program', promoValue: '20% OFF 50+ Units', expectedLift: 12, marginImpact: 9, overstockCoverage: 48 },
+  ],
+  'protect-margins': [
+    { segmentName: 'PRO Fleet Buyers', productGroup: 'Bulk Maintenance Components', promotion: 'Fleet Bulk Pricing Tier', promoValue: '10% OFF Case Orders (12+)', expectedLift: 10, marginImpact: 14, overstockCoverage: 60 },
+    { segmentName: 'Premium DIY Buyers', productGroup: 'Bulk Maintenance Components', promotion: 'Premium Value Multi-Pack', promoValue: 'Multi-Pack Savings (No Coupon)', expectedLift: 8, marginImpact: 16, overstockCoverage: 52 },
+  ],
+}
+
 const deriveOfferMapping = (category: string, _client?: 'autoparts', detectedCategories?: string[], selectedGoalId?: string) => {
-  // If a playbook goal was selected, build offer mapping from playbook categories + segments
-  const playbook = selectedGoalId ? BUSINESS_GOAL_PLAYBOOKS.find(g => g.id === selectedGoalId) : null
-  if (playbook && playbook.categories && playbook.segments) {
-    const discountStr = playbook.interpretation?.context.discountStrategy || '15–25%'
-    return playbook.categories.map((cat, index) => {
-      const segIndex = index < playbook.segments!.length ? index : 0
-      return {
-        segmentId: `seg-goal-${segIndex + 1}`,
-        segmentName: playbook.segments![segIndex].name,
-        productGroup: cat.name,
-        promotion: `${cat.name} — ${discountStr}`,
-        promoId: `promo-goal-${index + 1}`,
-        promoValue: discountStr,
-        expectedLift: 12 + index * 4,
-        marginImpact: -(3 + index * 2),
-        overstockCoverage: 65 + index * 10,
-      }
-    })
+  // If a playbook goal was selected, use goal-specific segment-specific promos
+  if (selectedGoalId && GOAL_PROMO_OFFERS[selectedGoalId]) {
+    return GOAL_PROMO_OFFERS[selectedGoalId].map((offer, index) => ({
+      segmentId: `seg-goal-${index + 1}`,
+      segmentName: offer.segmentName,
+      productGroup: offer.productGroup,
+      promotion: offer.promotion,
+      promoId: `promo-goal-${index + 1}`,
+      promoValue: offer.promoValue,
+      expectedLift: offer.expectedLift,
+      marginImpact: offer.marginImpact,
+      overstockCoverage: offer.overstockCoverage,
+    }))
   }
 
   if (detectedCategories && detectedCategories.length > 0) {
@@ -2548,6 +2560,15 @@ function ContextInputStep({
     if (isPaused) return
 
     // Playbook goals already have deterministic context — skip hypothesis/assumption/clarification
+    // Set detectedCategories from playbook so downstream steps (Products, Promos) use correct categories
+    if (selectedBusinessGoal?.categories) {
+      const playbookCategoryNames = selectedBusinessGoal.categories.map(c => c.name)
+      onUpdate({
+        detectedCategories: playbookCategoryNames,
+        category: playbookCategoryNames[0],
+      })
+    }
+
     // Go straight to ready and auto-authorize
     setAgentState(prev => ({
       ...prev,
@@ -4017,9 +4038,9 @@ function OfferStep({
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-warning" />
+                      <BarChart3 className={`w-4 h-4 ${o.marginImpact >= 0 ? 'text-success' : 'text-warning'}`} />
                       <span className="text-sm">
-                        <span className="font-semibold text-warning">{o.marginImpact}%</span> margin
+                        <span className={`font-semibold ${o.marginImpact >= 0 ? 'text-success' : 'text-warning'}`}>{o.marginImpact >= 0 ? '+' : ''}{o.marginImpact}%</span> margin
                       </span>
                     </div>
                   </div>
@@ -4047,8 +4068,8 @@ function OfferStep({
                 </span> avg
               </span>
               <span className="text-text-secondary">
-                Margin impact: <span className="font-medium text-warning">
-                  {activePromos.reduce((a, o) => a + o.marginImpact, 0) / Math.max(activePromos.length, 1)}%
+                Margin impact: <span className={`font-medium ${(activePromos.reduce((a, o) => a + o.marginImpact, 0) / Math.max(activePromos.length, 1)) >= 0 ? 'text-success' : 'text-warning'}`}>
+                  {(activePromos.reduce((a, o) => a + o.marginImpact, 0) / Math.max(activePromos.length, 1)) >= 0 ? '+' : ''}{Math.round(activePromos.reduce((a, o) => a + o.marginImpact, 0) / Math.max(activePromos.length, 1) * 10) / 10}%
                 </span> avg
               </span>
             </div>
@@ -4103,10 +4124,52 @@ function ProductStep({
   const [isReanalyzing, setIsReanalyzing] = useState(false)
   const [adjustmentApplied, setAdjustmentApplied] = useState<string | null>(null)
   
-  // Base product groups data - dynamically built from detected categories
+  // Base product groups data - use playbook data when a goal was selected, otherwise generic
   const segmentNames = segments.map(s => s.name)
   const detectedCats = campaign.detectedCategories || campaign.derivedContext?.detectedCategories
-  const baseProductGroups = getProductGroupsByClient(campaign.client || 'autoparts', segmentNames, detectedCats)
+  const playbook = campaign.selectedGoalId ? BUSINESS_GOAL_PLAYBOOKS.find(g => g.id === campaign.selectedGoalId) : null
+
+  const baseProductGroups = (() => {
+    if (playbook?.categories && playbook?.segments) {
+      // Build one product group per segment, distributing categories across segments
+      const segCount = playbook.segments.length
+      const catCount = playbook.categories!.length
+      return playbook.segments.map((seg, si) => {
+        let catsForSeg: typeof playbook.categories
+        if (catCount <= segCount) {
+          // Fewer categories than segments — all segments share the same category
+          catsForSeg = playbook.categories!
+        } else if (segCount === 1) {
+          catsForSeg = playbook.categories!
+        } else {
+          // More categories than segments — split: extras go to first segment
+          const perSeg = Math.ceil(catCount / segCount)
+          const start = si === 0 ? 0 : perSeg
+          const end = si === 0 ? perSeg : catCount
+          catsForSeg = playbook.categories!.slice(start, end)
+        }
+        const catNames = catsForSeg.map(c => c.name)
+        const allProducts = catsForSeg.flatMap(c => c.products)
+        const colors = ['from-orange-500 to-amber-500', 'from-teal-500 to-emerald-500', 'from-purple-500 to-indigo-500']
+        return {
+          segmentId: `seg-goal-${si + 1}`,
+          segmentName: seg.name,
+          group: catNames.join(' + '),
+          baseSkuCount: allProducts.length * 75,
+          rationale: seg.why,
+          color: colors[si % colors.length],
+          skus: allProducts.map(p => ({
+            id: p.sku,
+            name: p.name,
+            price: Math.floor(Math.random() * 50) + 10,
+            image: p.image,
+            visualDescription: p.name,
+          })),
+        }
+      })
+    }
+    return getProductGroupsByClient(campaign.client || 'autoparts', segmentNames, detectedCats)
+  })()
 
   // Dynamic product groups state
   const [productGroups, setProductGroups] = useState(
